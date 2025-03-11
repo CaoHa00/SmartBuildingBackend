@@ -47,6 +47,7 @@ public class FloorServiceImpl implements FloorService {
         // ✅ Save the floor and return response
         Floor savedFloor = floorRepository.save(floor);
         return FloorMapper.mapToFloorDto(savedFloor);
+        
     }
 
     @Override
@@ -64,7 +65,6 @@ public class FloorServiceImpl implements FloorService {
                     .orElseThrow(() -> new RuntimeException("Block not found with id: " + updateFloor.getBlock_id()));
             floor.setBlock(block);
         }
-
         // ✅ Save updated floor and return DTO
         Floor updatedFloor = floorRepository.save(floor);
         return FloorMapper.mapToFloorDto(updatedFloor);
