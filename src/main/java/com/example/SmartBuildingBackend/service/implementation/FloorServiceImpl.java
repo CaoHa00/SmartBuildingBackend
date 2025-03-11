@@ -60,9 +60,9 @@ public class FloorServiceImpl implements FloorService {
         floor.setFloor_name(updateFloor.getFloorName());
 
         // ✅ Only update Block if a new block_id is provided
-        if (updateFloor.getBlock_id() != null) {
-            Block block = blockRepository.findById(updateFloor.getBlock_id())
-                    .orElseThrow(() -> new RuntimeException("Block not found with id: " + updateFloor.getBlock_id()));
+        if (updateFloor.getBlock().getBlock_id() != null) {
+            Block block = blockRepository.findById(updateFloor.getBlock().getBlock_id())
+                    .orElseThrow(() -> new RuntimeException("Block not found with id: " + updateFloor.getBlock().getBlock_id()));
             floor.setBlock(block);
         }
         // ✅ Save updated floor and return DTO

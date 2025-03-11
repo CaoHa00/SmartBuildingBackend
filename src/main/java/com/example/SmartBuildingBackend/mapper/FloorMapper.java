@@ -10,18 +10,16 @@ public class FloorMapper {
         return new FloorDto(
                 floor.getFloor_id(),
                 floor.getFloor_name(),
-                floor.getBlock().getBlock_id(),
-                floor.getRooms());
+                floor.getBlock()
+                );
     }
 
-    public static Floor mapToFloor(FloorDto floorDto, BlockRepository blockRepository) {
-        Block block = blockRepository.findById(floorDto.getBlock_id()) // Fetch Block entity
-                .orElseThrow(() -> new RuntimeException("Block not found with id: " + floorDto.getBlock_id()));
-
+    public static Floor mapToFloor(FloorDto floorDto) {
+    
         return new Floor(
                 floorDto.getFloor_id(),
                 floorDto.getFloorName(),
-                block, // ✅ Pass the actual Block object
-                floorDto.getRooms());
+                floorDto.getBlock()
+                );
     }
 }

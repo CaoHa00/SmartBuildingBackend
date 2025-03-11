@@ -34,7 +34,7 @@ public class Floor {
     @JoinColumn(name = "block_id")
     private Block block;
 
-    @OneToMany(mappedBy = "floor", targetEntity = Room.class)
-    private List<Room> rooms;
+    // @OneToMany(mappedBy = "floor", targetEntity = Room.class)
+    // private List<Room> rooms;
 
 }

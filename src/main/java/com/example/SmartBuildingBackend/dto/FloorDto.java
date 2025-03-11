@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.dto;
 import java.util.List;
+
+import com.example.SmartBuildingBackend.entity.Block;
 import com.example.SmartBuildingBackend.entity.Room;
 
 import lombok.AllArgsConstructor;
@@ -14,6 +16,6 @@ import lombok.Setter;
 public class FloorDto {
     private int floor_id;
     private String floorName;
-    private Integer block_id;
-    private List<Room> rooms;
+    private Block block;
+    // private List<Room> rooms;
 }
