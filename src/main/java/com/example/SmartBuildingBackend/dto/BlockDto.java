@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BlockDto {
-    private int block_id;
+    private Integer block_id;
     private String blockName;
-    private List<Floor> floors;
+    // private List<Floor> floors;
 }

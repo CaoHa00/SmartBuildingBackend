@@ -29,7 +29,7 @@ public class BlockServiceImplementation implements BlockService {
         Block block = blockRepository.findById(blockId)
                 .orElseThrow(() -> new RuntimeException("Block is not found:" + blockId));
         block.setBlockName(blockDto.getBlockName());
-        block.setFloors(blockDto.getFloors());
+        // block.setFloors(blockDto.getFloors());
         Block updatedBlock = blockRepository.save(block);
         return BlockMapper.mapToBlockDto(updatedBlock);
     }
