@@ -17,5 +17,5 @@ public class FloorDto {
     private int floor_id;
     private String floorName;
     private Block block;
-    // private List<Room> rooms;
+    private List<Room> rooms;
 }

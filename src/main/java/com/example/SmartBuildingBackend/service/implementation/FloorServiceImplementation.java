@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class FloorServiceImpl implements FloorService {
+public class FloorServiceImplementation implements FloorService {
     private final FloorRepository floorRepository;
     private final BlockRepository blockRepository; // To find associated block
     @Override
@@ -75,5 +75,14 @@ public class FloorServiceImpl implements FloorService {
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
         floorRepository.delete(floor);
+    }
+
+    @Override
+    public List<FloorDto> getBlockFloors(int blockId) {
+       Floor floor = floorRepository.findById(blockId)
+                .orElseThrow(() -> new RuntimeException("Floor not found with id: " + blockId));
+        return floorRepository.findAll().stream()
+                .map(FloorMapper::mapToFloorDto).
+                toList();
     }
 }
