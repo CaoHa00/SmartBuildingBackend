@@ -52,9 +52,4 @@ public class FloorController {
         return ResponseEntity.ok("Floor deleted successfully");
     }
 
-    @GetMapping("/floors/{block_id}")
-    public ResponseEntity<List<FloorDto>> getBlockFloors(@PathVariable("block_id") int blockId) {
-        List<FloorDto> floors = floorService.getBlockFloors(blockId);
-        return ResponseEntity.ok(floors);
-    }
 }

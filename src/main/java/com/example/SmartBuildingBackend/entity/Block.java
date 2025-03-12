@@ -26,7 +26,7 @@ import lombok.Setter;
 public class Block {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer block_id;
+    private Integer blockId;
     @Column(name = "block_name", nullable = false)
     private String blockName;
 

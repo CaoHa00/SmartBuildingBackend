@@ -6,17 +6,19 @@ import com.example.SmartBuildingBackend.entity.Room;
 public class RoomMapper {
     public static RoomDto mapToRoomDto(Room room) {
         return new RoomDto(
-                room.getRoom_id(),
+                room.getRoomId(),
                 room.getRoom_name(),
-                room.getFloor()
+                room.getFloor(),
+                room.getEquipments()
                 );
         }
     
     public static Room mapToRoom (RoomDto roomDto) {
         return new Room(
-                roomDto.getRoom_id(),
+                roomDto.getRoomId(),
                 roomDto.getRoomName(),
-                roomDto.getFloor()
+                roomDto.getFloor(),
+                roomDto.getEquipments()
                 );
         }
 }
