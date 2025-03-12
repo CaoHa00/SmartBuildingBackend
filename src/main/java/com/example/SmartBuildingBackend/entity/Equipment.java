@@ -3,7 +3,9 @@ package com.example.SmartBuildingBackend.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,10 +42,12 @@ public class Equipment {
     @JsonBackReference
     private Room room;
 
-    @OneToMany(mappedBy = "equipment", targetEntity = LogUHoo.class)
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<LogUHoo> logUHoos;
 
-    @OneToMany(mappedBy = "equipment", targetEntity = LogAqara.class)
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<LogAqara> logAqaras;
 
 }

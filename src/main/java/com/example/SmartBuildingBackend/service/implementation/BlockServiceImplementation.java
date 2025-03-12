@@ -55,6 +55,4 @@ public class BlockServiceImplementation implements BlockService {
         return blocks.stream().map(BlockMapper::mapToBlockDto).toList();
     }
 
-
-
 }
