@@ -2,6 +2,9 @@ package com.example.SmartBuildingBackend.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,16 +28,17 @@ import lombok.Setter;
 public class Floor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int floor_id;
+    private Integer floor_id;
 
     @Column(name = "floor_name", nullable = false)
     private String floor_name;
 
     @ManyToOne
-    @JoinColumn(name = "block_id")
+    @JoinColumn(name = "block_id", nullable = false)
+    @JsonBackReference
     private Block block;
 
-    // @OneToMany(mappedBy = "floor", targetEntity = Room.class)
-    // private List<Room> rooms;
+    @OneToMany(mappedBy = "floor", cascade = CascadeType.ALL)
+    private List<Room> rooms;
 
 }

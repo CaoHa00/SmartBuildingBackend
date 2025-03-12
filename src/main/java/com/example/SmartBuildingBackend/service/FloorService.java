@@ -10,4 +10,5 @@ public interface FloorService {
     FloorDto updateFloor(int floorId, FloorDto updateFloor);
     void deleteFloor(int floorId);
     FloorDto addFloor(int blockId,FloorDto floorDto);
+    List<FloorDto> getBlockFloors(int blockId);
 }

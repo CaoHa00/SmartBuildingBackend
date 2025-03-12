@@ -7,14 +7,14 @@ public class BlockMapper {
     public static BlockDto mapToBlockDto(Block block) {
         return new BlockDto(
                 block.getBlock_id(),
-                block.getBlockName()
-                );
+                block.getBlockName(),
+                block.getFloors());
     }
 
     public static Block mapToBlock(BlockDto blockDto) {
         return new Block(
                 blockDto.getBlock_id(),
-                blockDto.getBlockName()
-                );
+                blockDto.getBlockName(),
+                blockDto.getFloors());
     }
 }
