@@ -4,6 +4,7 @@ package com.example.SmartBuildingBackend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SmartBuildingBackend.dto.RoomDto;
 import com.example.SmartBuildingBackend.service.RoomService;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,9 +31,9 @@ public class RoomController {
     private RoomService roomService;
 
     @PostMapping("/{floorId}")
-    public ResponseEntity <RoomDto> addRoom( @PathVariable int floorId, @RequestBody RoomDto roomDto) {
+    public ResponseEntity <RoomDto> addRoom( @PathVariable int floorId,@Valid @RequestBody RoomDto roomDto) {
         RoomDto newRoom = roomService.addRoom(floorId, roomDto);
-        return ResponseEntity.ok(newRoom);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newRoom);
     }
 
     @GetMapping
@@ -47,9 +49,9 @@ public class RoomController {
     }
 
     @PutMapping("/{room_id}")
-    public ResponseEntity<RoomDto> updateRoom (@PathVariable("room_id") int roomId, @RequestBody RoomDto updateRoom) {
+    public ResponseEntity<RoomDto> updateRoom (@PathVariable("room_id") int roomId,@Valid @RequestBody RoomDto updateRoom) {
         RoomDto updatedRoom = roomService.updateRoom(roomId, updateRoom);
-        return ResponseEntity.ok(updatedRoom);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updatedRoom);
     }
 
     @DeleteMapping("/{room_id}")

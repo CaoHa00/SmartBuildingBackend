@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.entity.Floor;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RoomDto {
     private Integer roomId;
+
+    @NotBlank(message = "Room name is required")
     private String roomName;
+    @NotBlank(message = "Room name is required")
     private Floor floor;
     private List<Equipment> equipments;
 }

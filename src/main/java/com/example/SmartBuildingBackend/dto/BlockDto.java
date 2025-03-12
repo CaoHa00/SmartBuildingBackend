@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter
@@ -15,6 +16,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BlockDto {
     private Integer blockId;
+
+    @NotBlank(message = "Block name is required")
     private String blockName;
+    
     private List<Floor> floors;
 }
