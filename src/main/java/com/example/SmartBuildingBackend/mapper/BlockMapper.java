@@ -6,14 +6,14 @@ import com.example.SmartBuildingBackend.entity.Block;
 public class BlockMapper {
     public static BlockDto mapToBlockDto(Block block) {
         return new BlockDto(
-                block.getBlock_id(),
+                block.getBlockId(),
                 block.getBlockName(),
                 block.getFloors());
     }
 
     public static Block mapToBlock(BlockDto blockDto) {
         return new Block(
-                blockDto.getBlock_id(),
+                blockDto.getBlockId(),
                 blockDto.getBlockName(),
                 blockDto.getFloors());
     }

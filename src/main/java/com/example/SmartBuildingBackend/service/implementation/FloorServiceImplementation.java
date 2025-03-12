@@ -41,7 +41,7 @@ public class FloorServiceImplementation implements FloorService {
 
         // ✅ Create new floor and set properties
         Floor floor = new Floor();
-        floor.setFloor_name(floorDto.getFloorName());
+        floor.setFloorName(floorDto.getFloorName());
         floor.setBlock(block); // Associate floor with the block
 
         // ✅ Save the floor and return response
@@ -57,12 +57,12 @@ public class FloorServiceImplementation implements FloorService {
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
 
         // ✅ Update floor name
-        floor.setFloor_name(updateFloor.getFloorName());
+        floor.setFloorName(updateFloor.getFloorName());
 
         // ✅ Only update Block if a new block_id is provided
-        if (updateFloor.getBlock().getBlock_id() != null) {
-            Block block = blockRepository.findById(updateFloor.getBlock().getBlock_id())
-                    .orElseThrow(() -> new RuntimeException("Block not found with id: " + updateFloor.getBlock().getBlock_id()));
+        if (updateFloor.getBlock().getBlockId() != null) {
+            Block block = blockRepository.findById(updateFloor.getBlock().getBlockId())
+                    .orElseThrow(() -> new RuntimeException("Block not found with id: " + updateFloor.getBlock().getBlockId()));
             floor.setBlock(block);
         }
         // ✅ Save updated floor and return DTO
@@ -77,12 +77,4 @@ public class FloorServiceImplementation implements FloorService {
         floorRepository.delete(floor);
     }
 
-    @Override
-    public List<FloorDto> getBlockFloors(int blockId) {
-       Floor floor = floorRepository.findById(blockId)
-                .orElseThrow(() -> new RuntimeException("Floor not found with id: " + blockId));
-        return floorRepository.findAll().stream()
-                .map(FloorMapper::mapToFloorDto).
-                toList();
-    }
 }

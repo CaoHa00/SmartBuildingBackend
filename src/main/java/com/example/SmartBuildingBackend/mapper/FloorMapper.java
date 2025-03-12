@@ -6,8 +6,8 @@ import com.example.SmartBuildingBackend.entity.Floor;
 public class FloorMapper {
     public static FloorDto mapToFloorDto(Floor floor) {
         return new FloorDto(
-                floor.getFloor_id(),
-                floor.getFloor_name(),
+                floor.getFloorId(),
+                floor.getFloorName(),
                 floor.getBlock(),
                 floor.getRooms()
                 );
@@ -16,7 +16,7 @@ public class FloorMapper {
     public static Floor mapToFloor(FloorDto floorDto) {
     
         return new Floor(
-                floorDto.getFloor_id(),
+                floorDto.getFloorId(),
                 floorDto.getFloorName(),
                 floorDto.getBlock(),
                 floorDto.getRooms()

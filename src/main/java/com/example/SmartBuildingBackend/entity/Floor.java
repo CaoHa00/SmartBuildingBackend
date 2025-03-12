@@ -28,10 +28,10 @@ import lombok.Setter;
 public class Floor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer floor_id;
+    private Integer floorId;
 
     @Column(name = "floor_name", nullable = false)
-    private String floor_name;
+    private String floorName;
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)

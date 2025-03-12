@@ -21,7 +21,7 @@ public class LogAqara {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long log_id;
+    private long logId;
 
     @Column(name = "time_stamp")
     private long time;

@@ -2,9 +2,12 @@ package com.example.SmartBuildingBackend.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,17 +26,18 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Equipment {
     @Id
-    @GeneratedValue
-    private int equipment_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int equipmentId;
 
     @Column(name = "equipment_name", nullable = false)
-    private String equipment_name;
+    private String equipmentName;
 
     @Column(name = "equipment_type", nullable = false)
-    private String equipment_type;
+    private String equipmentType;
 
     @ManyToOne
     @JoinColumn(name = "room_id")
+    @JsonBackReference
     private Room room;
 
     @OneToMany(mappedBy = "equipment", targetEntity = LogUHoo.class)
