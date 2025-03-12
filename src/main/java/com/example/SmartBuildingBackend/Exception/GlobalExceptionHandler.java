@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.Exception;
+package com.example.SmartBuildingBackend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.SmartBuildingBackend.dto.BlockDto;
-
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
