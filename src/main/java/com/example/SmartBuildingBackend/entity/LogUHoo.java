@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -75,5 +77,6 @@ public class LogUHoo {
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
+    @JsonBackReference
     private Equipment equipment;
 }
