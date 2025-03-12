@@ -3,6 +3,7 @@ package com.example.SmartBuildingBackend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SmartBuildingBackend.dto.FloorDto;
 import com.example.SmartBuildingBackend.service.FloorService;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -25,9 +27,9 @@ public class FloorController {
     private FloorService floorService;
 
     @PostMapping("/{blockId}")
-    public ResponseEntity<FloorDto> addFloor(@PathVariable int blockId, @RequestBody FloorDto floorDto) {
+    public ResponseEntity<FloorDto> addFloor(@PathVariable int blockId,@Valid @RequestBody FloorDto floorDto) {
         FloorDto newFloor = floorService.addFloor(blockId, floorDto);
-        return ResponseEntity.ok(newFloor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newFloor);
     }
     @GetMapping
     public ResponseEntity<List<FloorDto>> getAllFloors() {
@@ -41,9 +43,9 @@ public class FloorController {
     }
 
     @PutMapping("/{floor_id}")
-    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") int id, @RequestBody FloorDto updateFloor) {
+    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") int id,@Valid @RequestBody FloorDto updateFloor) {
         FloorDto updatedFloor = floorService.updateFloor(id, updateFloor);
-        return ResponseEntity.ok(updatedFloor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updatedFloor);
     }
 
     @DeleteMapping("/{floor_id}")
