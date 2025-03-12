@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.dto.BlockDto;
+
 import com.example.SmartBuildingBackend.entity.Block;
 import com.example.SmartBuildingBackend.mapper.BlockMapper;
 import com.example.SmartBuildingBackend.repository.BlockRepository;
@@ -53,5 +54,7 @@ public class BlockServiceImplementation implements BlockService {
         List<Block> blocks = blockRepository.findAll();
         return blocks.stream().map(BlockMapper::mapToBlockDto).toList();
     }
+
+
 
 }
