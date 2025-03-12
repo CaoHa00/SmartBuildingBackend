@@ -23,7 +23,7 @@ public class LogUHoo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long log_id;
+    private Long logId;
 
     @Column(name = "timestamp", nullable = true)
     private long timestamp; // Unix timestamp in milliseconds

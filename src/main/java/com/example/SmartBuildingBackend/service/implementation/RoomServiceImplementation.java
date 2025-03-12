@@ -37,9 +37,9 @@ public class RoomServiceImplementation implements RoomService {
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         
         room.setRoom_name(updateRoom.getRoomName());
-        if(updateRoom.getFloor().getFloor_id() != null) {
-            Floor floor = floorRepository.findById(updateRoom.getFloor().getFloor_id())
-                    .orElseThrow(() -> new RuntimeException("Floor not found with id: " + updateRoom.getFloor().getFloor_id()));
+        if(updateRoom.getFloor().getFloorId() != null) {
+            Floor floor = floorRepository.findById(updateRoom.getFloor().getFloorId())
+                    .orElseThrow(() -> new RuntimeException("Floor not found with id: " + updateRoom.getFloor().getFloorId()));
             room.setFloor(floor);;
         }
         Room updatedRoom = roomRepository.save(room);
