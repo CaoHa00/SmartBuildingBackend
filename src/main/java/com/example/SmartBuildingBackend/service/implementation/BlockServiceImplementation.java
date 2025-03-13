@@ -73,7 +73,7 @@ public class BlockServiceImplementation implements BlockService {
 
             for (int roomNum = 1; roomNum <= 23; roomNum++) {
                 String roomName = floorNum + String.format("%02d", roomNum);
-                Room room = Room.builder().room_name(roomName).floor(floor).build();
+                Room room = Room.builder().roomName(roomName).floor(floor).build();
                 roomList.add(room);
             }
 

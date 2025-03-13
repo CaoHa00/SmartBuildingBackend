@@ -7,7 +7,7 @@ public class RoomMapper {
     public static RoomDto mapToRoomDto(Room room) {
         return new RoomDto(
                 room.getRoomId(),
-                room.getRoom_name(),
+                room.getRoomName(),
                 room.getFloor(),
                 room.getEquipments()
                 );
