@@ -17,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EquipmentDto {
-    private Integer equipmentId;
+    private Long equipmentId;
 
     @NotBlank(message = "Equipment name is required")
     private String equipmentName;

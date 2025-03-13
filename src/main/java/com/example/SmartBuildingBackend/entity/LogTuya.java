@@ -1,8 +1,5 @@
 package com.example.SmartBuildingBackend.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,11 +13,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "log_aqara") // Table name in the database
+@Table(name = "log_tuya") // Table name in the database
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogAqara {
+public class LogTuya {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,26 +26,10 @@ public class LogAqara {
     @Column(name = "time_stamp")
     private long time;
 
-    @Column(name = "cost_energy")
-    private double costEnergy;
-
-    @Column(name = "load_power")
-    private double loadPower;
-
-    @Column(name = "lux")
-    private double lux;
-
-    @Column(name = "temperature")
-    private double temperature;
-
-    @Column(name = "humidity")
-    private double humidity;
-
-    @Column(name = "pressure")
-    private double pressure;
+    @Column(name = "electrical_energy")
+    private double electricalEnergy;
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
-    @JsonBackReference
     private Equipment equipment;
 }

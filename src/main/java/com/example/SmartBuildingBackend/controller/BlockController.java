@@ -39,20 +39,27 @@ public class BlockController {
     }
 
     @GetMapping("/{block_id}")
-    public ResponseEntity<BlockDto> getBlockById(@PathVariable("block_id") int blockId) {
+    public ResponseEntity<BlockDto> getBlockById(@PathVariable("block_id") Long blockId) {
         BlockDto block = blockService.getBlockById(blockId);
         return ResponseEntity.ok(block);
     }
 
     @PutMapping("/{block_id}")
-    public ResponseEntity<BlockDto> updateBlock(@PathVariable("block_id") int blockId,@Valid @RequestBody BlockDto blockDto) {
+    public ResponseEntity<BlockDto> updateBlock(@PathVariable("block_id") Long blockId,
+            @Valid @RequestBody BlockDto blockDto) {
         BlockDto updatedBlock = blockService.updateBlock(blockId, blockDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedBlock);
     }
 
     @DeleteMapping("/{block_id}")
-    public ResponseEntity<Void> deleteBlock(@PathVariable("block_id") int blockId) {
+    public ResponseEntity<Void> deleteBlock(@PathVariable("block_id") Long blockId) {
         blockService.deleteBlock(blockId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/create-b8")
+    public ResponseEntity<String> createBlockB8() {
+        blockService.createBlockB8();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Block B8 created successfully!");
     }
 }

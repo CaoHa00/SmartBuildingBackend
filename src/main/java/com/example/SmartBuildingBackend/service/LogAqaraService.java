@@ -6,14 +6,14 @@ import com.example.SmartBuildingBackend.dto.LogAqaraDto;
 
 public interface LogAqaraService {
 
-    LogAqaraDto addLogAqara(int equipmentId, LogAqaraDto logAqaraDto);
+    LogAqaraDto addLogAqara(Long equipmentId, LogAqaraDto logAqaraDto);
 
-    void deleteLogAqara(int logAqaraId);
+    void deleteLogAqara(Long logAqaraId);
 
     List<LogAqaraDto> getAllLogAqaras();
 
-    LogAqaraDto getLogAqaraById(int logAqaraId);
+    LogAqaraDto getLogAqaraById(Long logAqaraId);
 
-    LogAqaraDto updateLogAqara(int logAqaraId, LogAqaraDto logAqaraDto);
+    LogAqaraDto updateLogAqara(Long logAqaraId, LogAqaraDto logAqaraDto);
 
 }

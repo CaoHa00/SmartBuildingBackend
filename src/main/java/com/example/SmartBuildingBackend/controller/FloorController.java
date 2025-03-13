@@ -27,7 +27,7 @@ public class FloorController {
     private FloorService floorService;
 
     @PostMapping("/{blockId}")
-    public ResponseEntity<FloorDto> addFloor(@PathVariable int blockId,@Valid @RequestBody FloorDto floorDto) {
+    public ResponseEntity<FloorDto> addFloor(@PathVariable Long blockId,@Valid @RequestBody FloorDto floorDto) {
         FloorDto newFloor = floorService.addFloor(blockId, floorDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newFloor);
     }
@@ -37,19 +37,19 @@ public class FloorController {
         return ResponseEntity.ok(floors);
     }
     @GetMapping("/{floor_id}")
-    public ResponseEntity<FloorDto> getFloorById(@PathVariable("floor_id") int id) {
+    public ResponseEntity<FloorDto> getFloorById(@PathVariable("floor_id") Long id) {
         FloorDto floorDto = floorService.getFloorById(id);
         return ResponseEntity.ok(floorDto);
     }
 
     @PutMapping("/{floor_id}")
-    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") int id,@Valid @RequestBody FloorDto updateFloor) {
+    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") Long id,@Valid @RequestBody FloorDto updateFloor) {
         FloorDto updatedFloor = floorService.updateFloor(id, updateFloor);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedFloor);
     }
 
     @DeleteMapping("/{floor_id}")
-    public ResponseEntity<String> deleteFloor(@PathVariable("floor_id") int id) {
+    public ResponseEntity<String> deleteFloor(@PathVariable("floor_id") Long id) {
         floorService.deleteFloor(id);
         return ResponseEntity.ok("Floor deleted successfully");
     }

@@ -8,14 +8,14 @@ public interface BlockService {
 
     BlockDto addBlock(BlockDto blockDto);
 
-    BlockDto updateBlock(int blockId, BlockDto blockDto);
+    BlockDto updateBlock(Long blockId, BlockDto blockDto);
 
-    BlockDto getBlockById(int blockId);
+    BlockDto getBlockById(Long blockId);
 
-    void deleteBlock(int blockId);
+    void deleteBlock(Long blockId);
 
     List<BlockDto> getAllBlocks();
-    
+    void createBlockB8();
 
 
 }
