@@ -28,14 +28,14 @@ public class EquipmentServiceImplementation implements EquipmentService {
     }
 
     @Override
-    public EquipmentDto getEquipmentById(int equipmentId) {
+    public EquipmentDto getEquipmentById(Long equipmentId) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
         return EquipmentMapper.mapToEquipmentDto(equipment);
     }
 
     @Override
-    public EquipmentDto updateEquipment(int equipmentId, EquipmentDto updateEquipment) {
+    public EquipmentDto updateEquipment(Long equipmentId, EquipmentDto updateEquipment) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
         equipment.setEquipmentName(updateEquipment.getEquipmentName());
@@ -45,14 +45,14 @@ public class EquipmentServiceImplementation implements EquipmentService {
     }
 
     @Override
-    public void deleteEquipment(int equipmentId) {
+    public void deleteEquipment(Long equipmentId) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
         equipmentRepository.delete(equipment);
     }
 
     @Override
-    public EquipmentDto addEquipment(int roomId, EquipmentDto equipmentDto) {
+    public EquipmentDto addEquipment(Long roomId, EquipmentDto equipmentDto) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         Equipment equipment = new Equipment();

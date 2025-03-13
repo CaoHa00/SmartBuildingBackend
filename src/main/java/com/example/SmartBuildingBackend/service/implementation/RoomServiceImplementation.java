@@ -26,17 +26,17 @@ public class RoomServiceImplementation implements RoomService {
         return rooms.stream().map(RoomMapper::mapToRoomDto).collect(Collectors.toList());    
     }
     @Override
-    public RoomDto getRoomById(int roomId) {
+    public RoomDto getRoomById(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         return RoomMapper.mapToRoomDto(room);
     }
     @Override
-    public RoomDto updateRoom(int roomId, RoomDto updateRoom) {
+    public RoomDto updateRoom(Long roomId, RoomDto updateRoom) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         
-        room.setRoom_name(updateRoom.getRoomName());
+        room.setRoomName(updateRoom.getRoomName());
         if(updateRoom.getFloor().getFloorId() != null) {
             Floor floor = floorRepository.findById(updateRoom.getFloor().getFloorId())
                     .orElseThrow(() -> new RuntimeException("Floor not found with id: " + updateRoom.getFloor().getFloorId()));
@@ -47,17 +47,17 @@ public class RoomServiceImplementation implements RoomService {
         return RoomMapper.mapToRoomDto(updatedRoom);
     }
     @Override
-    public void deleteRoom(int roomId) {
+    public void deleteRoom(Long roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         roomRepository.delete(room);
     }
     @Override
-    public RoomDto addRoom(int floorId, RoomDto roomDto) {
+    public RoomDto addRoom(Long floorId, RoomDto roomDto) {
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
         Room room = new Room();
-        room.setRoom_name(roomDto.getRoomName());
+        room.setRoomName(roomDto.getRoomName());
         room.setFloor(floor);
 
         Room savedRoom = roomRepository.save(room);

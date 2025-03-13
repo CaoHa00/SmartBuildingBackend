@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.SmartBuildingBackend.entity.Room;
 @Repository
-public interface RoomRepository extends JpaRepository<Room, Integer> {
+public interface RoomRepository extends JpaRepository<Room, Long> {
     
 }

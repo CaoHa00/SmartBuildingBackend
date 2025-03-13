@@ -16,11 +16,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomDto {
-    private Integer roomId;
+    private Long roomId;
 
     @NotBlank(message = "Room name is required")
     private String roomName;
-    @NotBlank(message = "Room name is required")
+    // @NotBlank(message = "Room name is required")
     private Floor floor;
     private List<Equipment> equipments;
 }

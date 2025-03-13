@@ -27,14 +27,14 @@ public class FloorServiceImplementation implements FloorService {
     }
 
     @Override
-    public FloorDto getFloorById(int floorId) {
+    public FloorDto getFloorById(Long floorId) {
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
         return FloorMapper.mapToFloorDto(floor);
     }
 
     @Override
-    public FloorDto addFloor(int blockId, FloorDto floorDto) {
+    public FloorDto addFloor(Long blockId, FloorDto floorDto) {
         // ✅ Ensure block exists before associating with a floor
         Block block = blockRepository.findById(blockId)
                 .orElseThrow(() -> new RuntimeException("Block not found with id: " + blockId));
@@ -51,7 +51,7 @@ public class FloorServiceImplementation implements FloorService {
     }
 
     @Override
-    public FloorDto updateFloor(int floorId, FloorDto updateFloor) {
+    public FloorDto updateFloor(Long floorId, FloorDto updateFloor) {
         // ✅ Find existing floor
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
@@ -71,7 +71,7 @@ public class FloorServiceImplementation implements FloorService {
     }
 
     @Override
-    public void deleteFloor(int floorId) {
+    public void deleteFloor(Long floorId) {
         Floor floor = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Floor not found with id: " + floorId));
         floorRepository.delete(floor);

@@ -29,7 +29,7 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @PostMapping("/{roomId}")
-    public ResponseEntity<EquipmentDto> addEquipment(@PathVariable int roomId,@Valid @RequestBody EquipmentDto equipmentDto) {
+    public ResponseEntity<EquipmentDto> addEquipment(@PathVariable Long roomId,@Valid @RequestBody EquipmentDto equipmentDto) {
         EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEquipment);
     }
@@ -41,19 +41,19 @@ public class EquipmentController {
     }
     
     @GetMapping("/{equipment_id}")
-    public ResponseEntity<EquipmentDto> getEquipmentById(@PathVariable("equipment_id") int equipmentId) {
+    public ResponseEntity<EquipmentDto> getEquipmentById(@PathVariable("equipment_id") Long equipmentId) {
         EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         return ResponseEntity.ok(equipmentDto);
     }
 
     @PutMapping("/{equipment_id}")
-    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") int equipmentId,@Valid @RequestBody EquipmentDto updateEquipment) {
+    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") Long equipmentId,@Valid @RequestBody EquipmentDto updateEquipment) {
         EquipmentDto updatedEquipment = equipmentService.updateEquipment(equipmentId, updateEquipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedEquipment);
     }
 
     @DeleteMapping("/{equipment_id}")
-    public ResponseEntity<String> deleteEquipment(@PathVariable("equipment_id") int equipmentId) {
+    public ResponseEntity<String> deleteEquipment(@PathVariable("equipment_id") Long equipmentId) {
         equipmentService.deleteEquipment(equipmentId);
         return ResponseEntity.ok("Equipment deleted successfully");
     }

@@ -29,7 +29,7 @@ import lombok.Setter;
 public class Equipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int equipmentId;
+    private Long equipmentId;
 
     @Column(name = "equipment_name", nullable = false)
     private String equipmentName;

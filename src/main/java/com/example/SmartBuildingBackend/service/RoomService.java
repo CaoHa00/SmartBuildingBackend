@@ -6,8 +6,8 @@ import com.example.SmartBuildingBackend.dto.RoomDto;
 
 public interface RoomService {
     List<RoomDto> getAllRooms();
-    RoomDto getRoomById(int roomId);
-    RoomDto updateRoom(int roomId, RoomDto updateRoom);
-    void deleteRoom(int roomId);
-    RoomDto addRoom(int floorId,RoomDto roomDto);
+    RoomDto getRoomById(Long roomId);
+    RoomDto updateRoom(Long roomId, RoomDto updateRoom);
+    void deleteRoom(Long roomId);
+    RoomDto addRoom(Long floorId,RoomDto roomDto);
 }
