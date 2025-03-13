@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.SmartBuildingBackend.entity.Equipment;
 @Repository
-public interface EquipmentRepository extends JpaRepository<Equipment, Integer> {
+public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     
 }

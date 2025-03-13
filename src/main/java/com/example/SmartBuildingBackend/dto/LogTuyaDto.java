@@ -11,14 +11,9 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LogAqaraDto {
-    private Long logAqaraId;
+public class LogTuyaDto {
+    private Long logId;
     private long time;
-    private double costEnergy;
-    private double loadPower;
-    private double lux;
-    private double temperature;
-    private double humidity;
-    private double pressure;
+    private double electricalEnergy;
     private Equipment equipment;
 }

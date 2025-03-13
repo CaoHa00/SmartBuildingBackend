@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.example.SmartBuildingBackend.entity.Block;
 
 @Repository
-public interface BlockRepository extends JpaRepository<Block, Integer> {
+public interface BlockRepository extends JpaRepository<Block, Long> {
 
 }

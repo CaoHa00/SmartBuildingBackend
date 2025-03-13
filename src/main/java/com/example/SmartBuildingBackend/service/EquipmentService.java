@@ -6,8 +6,8 @@ import com.example.SmartBuildingBackend.dto.EquipmentDto;
 
 public interface EquipmentService {
     List<EquipmentDto> getAllEquipments();
-    EquipmentDto getEquipmentById(int equipmentId);
-    EquipmentDto updateEquipment(int equipmentId, EquipmentDto updateEquipment);
-    void deleteEquipment(int equipmentId);
-    EquipmentDto addEquipment(int equipmentId,EquipmentDto equipmentDto);
+    EquipmentDto getEquipmentById(Long equipmentId);
+    EquipmentDto updateEquipment(Long equipmentId, EquipmentDto updateEquipment);
+    void deleteEquipment(Long equipmentId);
+    EquipmentDto addEquipment(Long equipmentId,EquipmentDto equipmentDto);
 }

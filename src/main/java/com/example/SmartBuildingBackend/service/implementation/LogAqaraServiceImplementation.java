@@ -24,7 +24,7 @@ public class LogAqaraServiceImplementation implements LogAqaraService {
     private EquipmentRepository equipmentRepository;
 
     @Override
-    public LogAqaraDto addLogAqara(int equipmentId, LogAqaraDto logAqaraDto) {
+    public LogAqaraDto addLogAqara(Long equipmentId, LogAqaraDto logAqaraDto) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Room is not found:" + equipmentId));
 
@@ -36,7 +36,7 @@ public class LogAqaraServiceImplementation implements LogAqaraService {
     }
 
     @Override
-    public void deleteLogAqara(int logAqaraId) {
+    public void deleteLogAqara(Long logAqaraId) {
         LogAqara logAqara = logAqaraRepository.findById(logAqaraId)
                 .orElseThrow(() -> new RuntimeException("LogAqara is not found:" + logAqaraId));
         logAqaraRepository.delete(logAqara);
@@ -53,14 +53,14 @@ public class LogAqaraServiceImplementation implements LogAqaraService {
     }
 
     @Override
-    public LogAqaraDto getLogAqaraById(int logAqaraId) {
+    public LogAqaraDto getLogAqaraById(Long logAqaraId) {
         LogAqara logAqara = logAqaraRepository.findById(logAqaraId)
                 .orElseThrow(() -> new RuntimeException("LogAqara is not found:" + logAqaraId));
         return LogAqaraMapper.mapToLogAqaraDto(logAqara);
     }
 
     @Override
-    public LogAqaraDto updateLogAqara(int logAqaraId, LogAqaraDto logAqaraDto) {
+    public LogAqaraDto updateLogAqara(Long logAqaraId, LogAqaraDto logAqaraDto) {
         LogAqara logAqara = logAqaraRepository.findById(logAqaraId)
                 .orElseThrow(() -> new RuntimeException("LogAqara is not found:" + logAqaraId));
         logAqara.setTime(logAqaraDto.getTime());

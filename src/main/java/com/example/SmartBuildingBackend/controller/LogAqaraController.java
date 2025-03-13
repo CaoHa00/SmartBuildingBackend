@@ -30,27 +30,27 @@ public class LogAqaraController {
     }
 
     @PostMapping("/{equipment_id}")
-    public ResponseEntity<LogAqaraDto> addLogAqara(@PathVariable("equipment_id") int equipmentId,
+    public ResponseEntity<LogAqaraDto> addLogAqara(@PathVariable("equipment_id") Long equipmentId,
             @RequestBody LogAqaraDto logAqaraDto) {
         LogAqaraDto newLogAqara = logAqaraService.addLogAqara(equipmentId, logAqaraDto);
         return ResponseEntity.ok(newLogAqara);
     }
 
     @GetMapping("/{logaqara_id}")
-    public ResponseEntity<LogAqaraDto> getLogAqaraById(@PathVariable("logaqara_id") int logAqaraId) {
+    public ResponseEntity<LogAqaraDto> getLogAqaraById(@PathVariable("logaqara_id") Long logAqaraId) {
         LogAqaraDto logAqara = logAqaraService.getLogAqaraById(logAqaraId);
         return ResponseEntity.ok(logAqara);
     }
 
     @PutMapping("/{logaqara_id}")
-    public ResponseEntity<LogAqaraDto> updateLogAqara(@PathVariable("logaqara_id") int logAqaraId,
+    public ResponseEntity<LogAqaraDto> updateLogAqara(@PathVariable("logaqara_id") Long logAqaraId,
             @RequestBody LogAqaraDto logAqaraDto) {
         LogAqaraDto updatedLogAqara = logAqaraService.updateLogAqara(logAqaraId, logAqaraDto);
         return ResponseEntity.ok(updatedLogAqara);
     }
 
     @DeleteMapping("/{logaqara_id}")
-    public ResponseEntity<Void> deleteLogAqara(@PathVariable("logaqara_id") int logAqaraId) {
+    public ResponseEntity<Void> deleteLogAqara(@PathVariable("logaqara_id") Long logAqaraId) {
         logAqaraService.deleteLogAqara(logAqaraId);
         return ResponseEntity.ok().build();
     }

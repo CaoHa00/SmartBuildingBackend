@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BlockDto {
-    private Integer blockId;
+    private Long blockId;
 
     @NotBlank(message = "Block name is required")
     private String blockName;
