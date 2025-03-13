@@ -20,7 +20,7 @@ public class RoomDto {
 
     @NotBlank(message = "Room name is required")
     private String roomName;
-    @NotBlank(message = "Room name is required")
+    // @NotBlank(message = "Room name is required")
     private Floor floor;
     private List<Equipment> equipments;
 }

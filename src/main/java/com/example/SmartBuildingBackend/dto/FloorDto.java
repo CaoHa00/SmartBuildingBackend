@@ -18,7 +18,7 @@ public class FloorDto {
     private Long floorId;
     @NotBlank(message = "Floor name is required")
     private String floorName;
-    @NotBlank(message = "Block ID is required")
+    // @NotBlank(message = "Block ID is required")
     private Block block;
     private List<Room> rooms;
 }

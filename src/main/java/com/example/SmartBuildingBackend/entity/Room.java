@@ -34,7 +34,7 @@ public class Room {
     private Long roomId;
 
     @Column(name = "room_name", nullable = false)
-    private String room_name;
+    private String roomName;
 
     @ManyToOne()
     @JoinColumn(name = "floor_id", nullable = false)
