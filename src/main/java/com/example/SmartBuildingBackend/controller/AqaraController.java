@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
 
+import lombok.AllArgsConstructor;
+
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
 
-    public AqaraController(AqaraService aqaraService) {
-        this.aqaraService = aqaraService;
-    }
+    // public AqaraController(AqaraService aqaraService) {
+    //     this.aqaraService = aqaraService;
+    // }
 
     // @GetMapping("/send")
     // public String sendAqaraRequest() throws Exception {
