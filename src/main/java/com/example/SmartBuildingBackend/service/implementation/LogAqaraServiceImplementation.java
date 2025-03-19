@@ -5,12 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.dto.LogAqaraDto;
-import com.example.SmartBuildingBackend.entity.Block;
 import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.entity.LogAqara;
-import com.example.SmartBuildingBackend.entity.Room;
 import com.example.SmartBuildingBackend.mapper.LogAqaraMapper;
-import com.example.SmartBuildingBackend.repository.BlockRepository;
 import com.example.SmartBuildingBackend.repository.EquipmentRepository;
 import com.example.SmartBuildingBackend.repository.LogAqaraRepository;
 import com.example.SmartBuildingBackend.service.LogAqaraService;

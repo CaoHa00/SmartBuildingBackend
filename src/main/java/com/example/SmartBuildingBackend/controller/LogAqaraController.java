@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/logaqara")
 public class LogAqaraController {
     public LogAqaraService logAqaraService;
+    
 
     @GetMapping
     public ResponseEntity<List<LogAqaraDto>> getAllLogAqaras() {
