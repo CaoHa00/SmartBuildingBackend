@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.Exception;
+package com.example.SmartBuildingBackend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
