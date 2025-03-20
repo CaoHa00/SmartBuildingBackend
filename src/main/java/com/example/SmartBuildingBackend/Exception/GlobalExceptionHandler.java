@@ -20,7 +20,6 @@ public class GlobalExceptionHandler {
         Map<String, Object> error = new HashMap<>();
         error.put("error", "Bad Request");
         error.put("message", "Invalid JSON format. Please check your request body.");
-
         // Dynamically determine expected format based on the DTO class (if available)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
