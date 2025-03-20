@@ -71,7 +71,7 @@ public class AqaraController {
         try {
             String response = aqaraService.queryTemparatureAttributes();
             ObjectMapper objectMapper = new ObjectMapper();
-             JsonNode rootNode = objectMapper.readTree(response);
+            JsonNode rootNode = objectMapper.readTree(response);
             ArrayNode resultArray = (ArrayNode) rootNode.get("result");
             // Change the default JSON return from AQARA for readability
             ObjectNode result = objectMapper.createObjectNode(); 
