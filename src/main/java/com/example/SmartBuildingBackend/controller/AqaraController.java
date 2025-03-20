@@ -73,44 +73,28 @@ public class AqaraController {
             ObjectMapper objectMapper = new ObjectMapper();
              JsonNode rootNode = objectMapper.readTree(response);
             ArrayNode resultArray = (ArrayNode) rootNode.get("result");
-
             // Change the default JSON return from AQARA for readability
+            ObjectNode result = objectMapper.createObjectNode(); 
             for (JsonNode node : resultArray) {
                 JsonNode valueNode = node.get("value");
                 String resouceId = node.get("resourceId").asText();
+                String timeStamp = node.get("timeStamp").asText();
                 //write temperature
                 if (valueNode != null && resouceId.equals("0.1.85")) {
-                    ((ObjectNode) node).put("temperature", valueNode.asText().substring(0,2)); // Copy value
+                    // ((ObjectNode) node).put("temperature", valueNode.asText().substring(0,2)); // Copy value
+                    result.put("temperature", valueNode.asText().substring(0,2));
                 }
                 //write humidity
                 if (valueNode != null && resouceId.equals("0.2.85")) {
-                    ((ObjectNode) node).put("humidity", valueNode.asText().substring(0,2)); // Copy value
+                    // ((ObjectNode) node).put("humidity", valueNode.asText().substring(0,2)); // Copy value
+                    result.put("humidity", valueNode.asText().substring(0,2));
                 }
+                result.put("timeStamp", timeStamp);
             }
-              //      Example JSON return
-            //     "result": [
-            //         {
-            //             "timeStamp": 1742449445425,
-            //             "resourceId": "0.1.85",
-            //             "value": "2443",
-            //             "subjectId": "lumi.54ef441000a4894c",
-            //             "temperature": "24" // the value front-end get
-            //         },
-            //         {
-            //             "timeStamp": 1742449445425,
-            //             "resourceId": "0.2.85",
-            //             "value": "5049",
-            //             "subjectId": "lumi.54ef441000a4894c",
-            //             "humidity": "50" // the value front-end get
-            //         }
-            //     ]
-            // }
-            // Convert back to JSON string
-            String updatedResponse = objectMapper.writeValueAsString(rootNode);
+            String updatedResponse = objectMapper.writeValueAsString(result);
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
-    }
-    
+    } 
 }
