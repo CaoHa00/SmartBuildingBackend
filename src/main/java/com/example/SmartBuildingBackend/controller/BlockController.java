@@ -27,9 +27,8 @@ public class BlockController {
 
     @GetMapping
     public ResponseEntity<List<BlockDto>> getAllBlocks() {
-
         List<BlockDto> blocks = blockService.getAllBlocks();
-        return ResponseEntity.ok(blocks);
+        return ResponseEntity.status(HttpStatus.OK).body(blocks);
     }
 
     @PostMapping

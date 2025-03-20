@@ -1,14 +1,23 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.AllArgsConstructor;
 
@@ -18,19 +27,74 @@ import lombok.AllArgsConstructor;
 public class AqaraController {
     private final AqaraService aqaraService;
 
-    // public AqaraController(AqaraService aqaraService) {
-    //     this.aqaraService = aqaraService;
-    // }
-
-    // @GetMapping("/send")
-    // public String sendAqaraRequest() throws Exception {
-    //     return aqaraService.sendRequestToAqara();
-    // }
-
+    
     @PostMapping("/query-device-info")
     public ResponseEntity<String> queryDeviceInfo(@RequestBody Map<String, Object> requestBody) throws Exception {
             String response = aqaraService.sendRequestToAqara(requestBody);
             return ResponseEntity.ok(response);
        
     }
+
+    @PostMapping("/query-resource-info")
+    public ResponseEntity<String> queryResourceInfo(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // Ensure "data" is present in the request body
+            if (!requestBody.containsKey("data")) {
+                return ResponseEntity.badRequest().body("Error: 'data' object is missing in the request body.");
+            }
+
+            // Extract "model" and "resourceId" from the "data" object
+            Object dataObj = requestBody.get("data");
+            if (!(dataObj instanceof Map)) {
+                return ResponseEntity.badRequest().body("Error: 'data' format is incorrect.");
+            }
+
+            Map<String, Object> dataMap = (Map<String, Object>) dataObj;
+            String model = (String) dataMap.get("model");
+            String resourceId = (String) dataMap.get("resourceId"); 
+
+            if (model == null || model.isEmpty()) {
+                return ResponseEntity.badRequest().body("Error: 'model' is required.");
+            }
+
+            // Call the service method
+            String response = aqaraService.queryDetailsAttributes(requestBody, model, resourceId);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/query-temperature")
+    public ResponseEntity<String> queryTemparatureAttributes() {
+        try {
+            String response = aqaraService.queryTemparatureAttributes();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(response);
+            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
+            // Change the default JSON return from AQARA for readability
+            ObjectNode result = objectMapper.createObjectNode(); 
+            for (JsonNode node : resultArray) {
+                JsonNode valueNode = node.get("value");
+                String resouceId = node.get("resourceId").asText();
+                String timeStamp = node.get("timeStamp").asText();
+                //write temperature
+                if (valueNode != null && resouceId.equals("0.1.85")) {
+                    // ((ObjectNode) node).put("temperature", valueNode.asText().substring(0,2)); // Copy value
+                    result.put("temperature", valueNode.asText().substring(0,2));
+                }
+                //write humidity
+                if (valueNode != null && resouceId.equals("0.2.85")) {
+                    // ((ObjectNode) node).put("humidity", valueNode.asText().substring(0,2)); // Copy value
+                    result.put("humidity", valueNode.asText().substring(0,2));
+                }
+                result.put("timeStamp", timeStamp);
+            }
+            String updatedResponse = objectMapper.writeValueAsString(result);
+            return ResponseEntity.ok(updatedResponse);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    } 
 }
