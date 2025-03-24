@@ -1,9 +1,6 @@
 package com.example.SmartBuildingBackend.service;
 
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.Map;
 
 @Service

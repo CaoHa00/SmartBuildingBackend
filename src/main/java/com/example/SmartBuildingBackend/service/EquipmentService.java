@@ -9,5 +9,5 @@ public interface EquipmentService {
     EquipmentDto getEquipmentById(Long equipmentId);
     EquipmentDto updateEquipment(Long equipmentId, EquipmentDto updateEquipment);
     void deleteEquipment(Long equipmentId);
-    EquipmentDto addEquipment(Long equipmentId,EquipmentDto equipmentDto);
+    EquipmentDto addEquipment(Long roomId, Long equipmentTypeId, EquipmentDto equipmentDto);
 }

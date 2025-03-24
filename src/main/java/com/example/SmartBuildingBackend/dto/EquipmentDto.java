@@ -3,8 +3,8 @@ package com.example.SmartBuildingBackend.dto;
 
 import java.util.List;
 
-import com.example.SmartBuildingBackend.entity.LogAqara;
-import com.example.SmartBuildingBackend.entity.LogUHoo;
+import com.example.SmartBuildingBackend.entity.EquipmentType;
+import com.example.SmartBuildingBackend.entity.LogValue;
 import com.example.SmartBuildingBackend.entity.Room;
 
 import jakarta.validation.constraints.NotBlank;
@@ -22,9 +22,12 @@ public class EquipmentDto {
     @NotBlank(message = "Equipment name is required")
     private String equipmentName;
 
+    @NotBlank(message = "Device id is required")
+    private String deviceId;
+
     @NotBlank(message = "Equipment type is required")
-    private String equipmentType;
+    private EquipmentType equipmentType;
+    
     private Room room;
-    private List<LogUHoo> logUHoos;
-    private List<LogAqara> logAqaras;
+    private List<LogValue> logValues;
 }

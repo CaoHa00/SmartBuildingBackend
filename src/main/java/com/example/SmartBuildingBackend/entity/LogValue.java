@@ -1,7 +1,6 @@
 package com.example.SmartBuildingBackend.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,43 +10,38 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@Builder
 @Entity
-@Table(name = "log_aqara") // Table name in the database
+@Table(name = "log_value") // Table name in the database
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogAqara {
-
+public class LogValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long logId;
+    private Long logValueId;
 
     @Column(name = "time_stamp")
-    private long time;
-
-    @Column(name = "cost_energy")
-    private double costEnergy;
-
-    @Column(name = "load_power")
-    private double loadPower;
-
-    @Column(name = "lux")
-    private double lux;
-
-    @Column(name = "temperature")
-    private double temperature;
-
-    @Column(name = "humidity")
-    private double humidity;
-
-    @Column(name = "pressure")
-    private double pressure;
+    private long timeStamp;
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
-    @JsonBackReference
+    @JsonBackReference(value = "equipment")
     private Equipment equipment;
+
+    @ManyToOne
+    @JoinColumn(name="value_id")
+    @JsonBackReference(value = "value")
+    private Value value;
+
+    @Column(name = "value")
+    private Long valueResponse; // actual value 
 }

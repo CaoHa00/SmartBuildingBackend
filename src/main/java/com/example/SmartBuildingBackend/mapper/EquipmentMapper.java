@@ -7,22 +7,22 @@ public class EquipmentMapper {
     public static EquipmentDto mapToEquipmentDto(Equipment equipment) {
         return new EquipmentDto(
                 equipment.getEquipmentId(),
+                equipment.getDeviceId(),
                 equipment.getEquipmentName(),
                 equipment.getEquipmentType(),
                 equipment.getRoom(),
-                equipment.getLogUHoos(),
-                equipment.getLogAqaras()
+                equipment.getLogValues()
                 );
         }
     
     public static Equipment mapToEquipment (EquipmentDto equipmentDto) {
         return new Equipment(
                 equipmentDto.getEquipmentId(),
+                equipmentDto.getDeviceId(),
                 equipmentDto.getEquipmentName(),
                 equipmentDto.getEquipmentType(),
                 equipmentDto.getRoom(),
-                equipmentDto.getLogUHoos(),
-                equipmentDto.getLogAqaras()
+                equipmentDto.getLogValues()
                 );
         }
 }

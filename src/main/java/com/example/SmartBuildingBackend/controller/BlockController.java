@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SmartBuildingBackend.dto.BlockDto;
 import com.example.SmartBuildingBackend.service.BlockService;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -32,7 +31,7 @@ public class BlockController {
     }
 
     @PostMapping
-    public ResponseEntity<BlockDto> addBlock(@Valid @RequestBody BlockDto blockDto) {
+    public ResponseEntity<BlockDto> addBlock( @RequestBody BlockDto blockDto) {
         BlockDto newBlock = blockService.addBlock(blockDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newBlock);
     }
@@ -45,7 +44,7 @@ public class BlockController {
 
     @PutMapping("/{block_id}")
     public ResponseEntity<BlockDto> updateBlock(@PathVariable("block_id") Long blockId,
-            @Valid @RequestBody BlockDto blockDto) {
+             @RequestBody BlockDto blockDto) {
         BlockDto updatedBlock = blockService.updateBlock(blockId, blockDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedBlock);
     }
