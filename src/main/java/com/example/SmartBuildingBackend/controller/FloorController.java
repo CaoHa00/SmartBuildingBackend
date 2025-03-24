@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;  
 import com.example.SmartBuildingBackend.dto.FloorDto;
 import com.example.SmartBuildingBackend.service.FloorService;
-
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -27,7 +25,7 @@ public class FloorController {
     private FloorService floorService;
 
     @PostMapping("/{blockId}")
-    public ResponseEntity<FloorDto> addFloor(@PathVariable Long blockId,@Valid @RequestBody FloorDto floorDto) {
+    public ResponseEntity<FloorDto> addFloor(@PathVariable Long blockId, @RequestBody FloorDto floorDto) {
         FloorDto newFloor = floorService.addFloor(blockId, floorDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newFloor);
     }
@@ -43,7 +41,7 @@ public class FloorController {
     }
 
     @PutMapping("/{floor_id}")
-    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") Long id,@Valid @RequestBody FloorDto updateFloor) {
+    public ResponseEntity<FloorDto> updateFloor(@PathVariable("floor_id") Long id, @RequestBody FloorDto updateFloor) {
         FloorDto updatedFloor = floorService.updateFloor(id, updateFloor);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedFloor);
     }

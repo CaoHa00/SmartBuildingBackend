@@ -2,9 +2,6 @@ package com.example.SmartBuildingBackend.mapper;
 
 import com.example.SmartBuildingBackend.dto.LogAqaraDto;
 import com.example.SmartBuildingBackend.entity.LogAqara;
-
-import lombok.extern.java.Log;
-
 public class LogAqaraMapper {
     public static LogAqaraDto mapToLogAqaraDto(LogAqara logAqara) {
         return new LogAqaraDto(

@@ -33,9 +33,14 @@ public class Equipment {
 
     @Column(name = "equipment_name", nullable = false)
     private String equipmentName;
+    
+    @Column(name = "device_id", nullable = false)
+    private String deviceId;
 
-    @Column(name = "equipment_type", nullable = false)
-    private String equipmentType;
+    @ManyToOne
+    @JoinColumn(name = "equipmentType_id", nullable = false)
+    @JsonBackReference(value = "equipmentType-ref")
+    private EquipmentType equipmentType;
 
     @ManyToOne
     @JoinColumn(name = "room_id")
@@ -43,11 +48,7 @@ public class Equipment {
     private Room room;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<LogUHoo> logUHoos;
-
-    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<LogAqara> logAqaras;
+    @JsonManagedReference(value = "equipment")
+    private List<LogValue> logValues;
 
 }
