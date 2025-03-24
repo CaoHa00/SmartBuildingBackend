@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.entity.Equipment;
+import com.example.SmartBuildingBackend.entity.EquipmentType;
 import com.example.SmartBuildingBackend.entity.Room;
 import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.repository.EquipmentRepository;
+import com.example.SmartBuildingBackend.repository.EquipmentTypeRepository;
 import com.example.SmartBuildingBackend.repository.RoomRepository;
 import com.example.SmartBuildingBackend.service.EquipmentService;
 
@@ -19,12 +21,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EquipmentServiceImplementation implements EquipmentService {
     private final EquipmentRepository equipmentRepository;
+    private final EquipmentTypeRepository equipmentTypeRepository;
     private final RoomRepository roomRepository;
 
     @Override
     public List<EquipmentDto> getAllEquipments() {
         List<Equipment> equipments = equipmentRepository.findAll();
-        return equipments.stream().map(EquipmentMapper::mapToEquipmentDto).collect(Collectors.toList());    
+        return equipments.stream().map(EquipmentMapper::mapToEquipmentDto).collect(Collectors.toList());
     }
 
     @Override
@@ -39,7 +42,7 @@ public class EquipmentServiceImplementation implements EquipmentService {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
         equipment.setEquipmentName(updateEquipment.getEquipmentName());
-   
+
         Equipment updatedEquipment = equipmentRepository.save(equipment);
         return EquipmentMapper.mapToEquipmentDto(updatedEquipment);
     }
@@ -52,16 +55,19 @@ public class EquipmentServiceImplementation implements EquipmentService {
     }
 
     @Override
-    public EquipmentDto addEquipment(Long roomId, EquipmentDto equipmentDto) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
-        Equipment equipment = new Equipment();
-        equipment.setEquipmentName(equipmentDto.getEquipmentName());
-        equipment.setEquipmentType(equipmentDto.getEquipmentType());
-        equipment.setRoom(room);
-        Equipment savedEquipment = equipmentRepository.save(equipment);
-        return EquipmentMapper.mapToEquipmentDto(savedEquipment); 
-    }
+public EquipmentDto addEquipment(Long roomId, Long equipmentTypeId, EquipmentDto equipmentDto) {
+    Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
+
+    EquipmentType equipmentType = equipmentTypeRepository.findById(equipmentTypeId)
+            .orElseThrow(() -> new RuntimeException("Equipment Type not found with id: " + equipmentTypeId));
+
+    Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
+    // equipment.setEquipmentName(equipmentDto.getEquipmentName());
+    // equipment.setDeviceId(equipmentDto.getDeviceId()); // Assuming EquipmentType has a 'typeName' field
+    equipment.setRoom(room);
+    equipment.setEquipmentType(equipmentType);
+    Equipment savedEquipment = equipmentRepository.save(equipment);
+    return EquipmentMapper.mapToEquipmentDto(savedEquipment);
 }
-
-
+}

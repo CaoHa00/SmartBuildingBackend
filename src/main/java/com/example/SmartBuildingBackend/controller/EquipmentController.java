@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.service.EquipmentService;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,9 +28,9 @@ public class EquipmentController {
     @Autowired
     private EquipmentService equipmentService;
 
-    @PostMapping("/{roomId}")
-    public ResponseEntity<EquipmentDto> addEquipment(@PathVariable Long roomId,@Valid @RequestBody EquipmentDto equipmentDto) {
-        EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentDto);
+    @PostMapping
+    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam Long roomId, @RequestParam Long equipmentTypeId , @RequestBody EquipmentDto equipmentDto) {
+        EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentTypeId,equipmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEquipment);
     }
 
@@ -47,7 +47,7 @@ public class EquipmentController {
     }
 
     @PutMapping("/{equipment_id}")
-    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") Long equipmentId,@Valid @RequestBody EquipmentDto updateEquipment) {
+    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") Long equipmentId, @RequestBody EquipmentDto updateEquipment) {
         EquipmentDto updatedEquipment = equipmentService.updateEquipment(equipmentId, updateEquipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedEquipment);
     }

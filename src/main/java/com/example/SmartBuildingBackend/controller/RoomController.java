@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SmartBuildingBackend.dto.RoomDto;
 import com.example.SmartBuildingBackend.service.RoomService;
 
-import jakarta.validation.Valid;
+
 import lombok.AllArgsConstructor;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +31,7 @@ public class RoomController {
     private RoomService roomService;
 
     @PostMapping("/{floorId}")
-    public ResponseEntity <RoomDto> addRoom( @PathVariable Long floorId,@Valid @RequestBody RoomDto roomDto) {
+    public ResponseEntity <RoomDto> addRoom( @PathVariable Long floorId, @RequestBody RoomDto roomDto) {
         RoomDto newRoom = roomService.addRoom(floorId, roomDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newRoom);
     }
@@ -49,7 +49,7 @@ public class RoomController {
     }
 
     @PutMapping("/{room_id}")
-    public ResponseEntity<RoomDto> updateRoom (@PathVariable("room_id") Long roomId,@Valid @RequestBody RoomDto updateRoom) {
+    public ResponseEntity<RoomDto> updateRoom (@PathVariable("room_id") Long roomId, @RequestBody RoomDto updateRoom) {
         RoomDto updatedRoom = roomService.updateRoom(roomId, updateRoom);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedRoom);
     }
