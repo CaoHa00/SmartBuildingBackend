@@ -2,16 +2,11 @@ package com.example.SmartBuildingBackend.service.implementation;
 
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.dto.EquipmentTypeDto;
-import com.example.SmartBuildingBackend.entity.Block;
 import com.example.SmartBuildingBackend.entity.EquipmentType;
-import com.example.SmartBuildingBackend.mapper.BlockMapper;
-import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.mapper.EquipmentTypeMapper;
 import com.example.SmartBuildingBackend.repository.EquipmentTypeRepository;
 import com.example.SmartBuildingBackend.service.EquipementTypeService;
