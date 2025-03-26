@@ -1,5 +1,4 @@
 package com.example.SmartBuildingBackend.controller;
-
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 import com.example.SmartBuildingBackend.service.LogValueService;
 
@@ -53,4 +52,6 @@ public class LogValueController {
         logValueService.deleteLogValue(logValueId);
         return ResponseEntity.ok("LogValue deleted successfully.");
     }
+
+   
 }
