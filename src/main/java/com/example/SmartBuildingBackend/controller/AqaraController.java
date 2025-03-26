@@ -55,13 +55,13 @@ public class AqaraController {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
-    @PostMapping("/query-temperature")
-    public ResponseEntity<String> queryTemperatureAttributes(@RequestBody EquipmentDto equipmentDto) {
+    @PostMapping("/currentValue")
+    public ResponseEntity<String> queryAttributes(@RequestBody EquipmentDto equipmentDto) {
         try {
             //get Response from Chinese server
             String response = aqaraService.queryTemparatureAttributes(equipmentDto.getDeviceId());
             // directly get the processed JSON response
-            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,equipmentDto,"temperature");
+            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,equipmentDto);
             String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
