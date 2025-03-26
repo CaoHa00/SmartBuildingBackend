@@ -18,5 +18,5 @@ public interface AqaraService {
 
     String convertToJson(Map<String, Object> request);
 
-    ObjectNode getJsonAPIFromServer(String response,EquipmentDto equipmentDto, String nameValue);
+    ObjectNode getJsonAPIFromServer(String response,EquipmentDto equipmentDto);
 }

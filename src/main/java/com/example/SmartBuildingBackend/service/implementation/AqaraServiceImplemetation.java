@@ -103,6 +103,7 @@ public class AqaraServiceImplemetation implements AqaraService {
         // Add resourceIds as a List
         List<String> resourceIds = new ArrayList<>();
         resourceIds.add("0.1.85");
+        resourceIds.add("0.2.85");
         resource.put("resourceIds", resourceIds);
 
         // Wrap resource in a List
@@ -131,7 +132,7 @@ public class AqaraServiceImplemetation implements AqaraService {
 
     // method to process API response from CHINA
     @Override
-    public ObjectNode getJsonAPIFromServer(String response, EquipmentDto equipmentDto, String nameValue) {
+    public ObjectNode getJsonAPIFromServer(String response, EquipmentDto equipmentDto) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode result = objectMapper.createObjectNode();
         try {
@@ -145,18 +146,26 @@ public class AqaraServiceImplemetation implements AqaraService {
                 String timeStamp = node.get("timeStamp").asText();
 
                 // Extract temperature value if the resourceId matches
-
                 if (valueNode != null && resourceId.equals("0.1.85")) {
                     result.put("temperature", valueNode.asText().substring(0, 2));
-                    //input LogValue to store value
+                    // input LogValue to store value
                     logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                     logValueDto.setValueResponse(node.get("value").asLong());
+                    Long valueId = valueService.getValueByName("temperature");
+                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
+                
+                }
+                if (valueNode != null && resourceId.equals("0.2.85")) {
+                    result.put("humidity", valueNode.asText().substring(0, 2));
+                    // input LogValue to store value
+                    logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                    logValueDto.setValueResponse(node.get("value").asLong());
+                    Long valueId = valueService.getValueByName("humidity");
+                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
                 }
                 result.put("timeStamp", timeStamp);
             }
-            Long valueId = valueService.getValueByName(nameValue);
-            logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
-        } catch (Exception e) {
+           } catch (Exception e) {
             throw new RuntimeException("Error processing JSON response", e);
         }
         return result;
