@@ -9,13 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.mapper.AqaraConfigMapper;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
+
+import com.example.SmartBuildingBackend.dto.EquipmentDto;
+
 import com.example.SmartBuildingBackend.service.AqaraService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.AllArgsConstructor;
@@ -25,16 +27,14 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
-    @Autowired
+
     private AqaraConfigRepository aqaraConfigRepository;
 
     @PostMapping("/query-device-info")
     public ResponseEntity<String> queryDeviceInfo(@RequestBody Map<String, Object> requestBody) throws Exception {
             String response = aqaraService.sendRequestToAqara(requestBody);
             return ResponseEntity.ok(response);
-       
     }
-
     @PostMapping("/query-resource-info")
     public ResponseEntity<String> queryResourceInfo(@RequestBody Map<String, Object> requestBody) {
         try {
@@ -65,10 +65,10 @@ public class AqaraController {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
-    
-    @PostMapping("/query-temperature")
-    public ResponseEntity<String> queryTemparatureAttributes() {
+    @PostMapping("/currentValue")
+    public ResponseEntity<String> queryAttributes(@RequestBody EquipmentDto equipmentDto) {
         try {
+
             String response = aqaraService.queryTemparatureAttributes();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response);
@@ -92,10 +92,18 @@ public class AqaraController {
                 result.put("timeStamp", timeStamp);
             }
             String updatedResponse = objectMapper.writeValueAsString(result);
+
+            //get Response from Chinese server
+            String response = aqaraService.queryTemparatureAttributes(equipmentDto.getDeviceId());
+            // directly get the processed JSON response
+            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,equipmentDto);
+            String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
+
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
+
     } 
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
@@ -198,5 +206,6 @@ public class AqaraController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
+
     }
 }

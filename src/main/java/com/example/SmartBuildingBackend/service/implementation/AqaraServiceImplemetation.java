@@ -21,11 +21,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
+
+import com.example.SmartBuildingBackend.configuration.AqaraConfig;
+import com.example.SmartBuildingBackend.dto.EquipmentDto;
+import com.example.SmartBuildingBackend.dto.LogValueDto;
+
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.service.LogValueService;
+import com.example.SmartBuildingBackend.service.ValueService;
 import com.example.SmartBuildingBackend.utils.CreateSign;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
@@ -33,6 +43,10 @@ import com.google.api.services.gmail.model.MessagePart;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import lombok.AllArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,8 +54,13 @@ import org.jsoup.nodes.Document;
 @AllArgsConstructor
 public class AqaraServiceImplemetation implements AqaraService {
     private final RestTemplate restTemplate = new RestTemplate();
+
     private final AqaraConfigRepository aqaraConfigRepository;
     private final Gmail gmailService; 
+
+    private LogValueService logValueService;
+    private final ValueService valueService;
+
 
   
     @Override
@@ -97,14 +116,15 @@ public class AqaraServiceImplemetation implements AqaraService {
     }
     
     @Override
-    public String queryTemparatureAttributes()
+    public String queryTemparatureAttributes(String deviceId)
             throws Exception {
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("intent", "query.resource.value");
 
         // Create a single resource entry
         Map<String, Object> resource = new HashMap<>();
-        resource.put("subjectId", "lumi.54ef441000a4894c");
+        resource.put("subjectId", deviceId);
 
         // Add resourceIds as a List
         List<String> resourceIds = new ArrayList<>();
@@ -125,6 +145,7 @@ public class AqaraServiceImplemetation implements AqaraService {
         // Send the request
         return sendAqaraRequest(requestBody);
     }
+
     @Override
     public String convertToJson(Map<String, Object> request) {
         try {
@@ -134,6 +155,7 @@ public class AqaraServiceImplemetation implements AqaraService {
             return "Error converting to JSON: " + e.getMessage();
         }
     }
+
 
     @Override
     public String authorizationVerificationCode() throws Exception {
@@ -278,4 +300,46 @@ public class AqaraServiceImplemetation implements AqaraService {
         return sendAqaraRequest(requestBody);
     }
    
+
+    // method to process API response from CHINA
+    @Override
+    public ObjectNode getJsonAPIFromServer(String response, EquipmentDto equipmentDto) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode result = objectMapper.createObjectNode();
+        try {
+            JsonNode rootNode = objectMapper.readTree(response);
+            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
+
+            LogValueDto logValueDto = new LogValueDto();
+            for (JsonNode node : resultArray) {
+                JsonNode valueNode = node.get("value");
+                String resourceId = node.get("resourceId").asText();
+                String timeStamp = node.get("timeStamp").asText();
+
+                // Extract temperature value if the resourceId matches
+                if (valueNode != null && resourceId.equals("0.1.85")) {
+                    result.put("temperature", valueNode.asText().substring(0, 2));
+                    // input LogValue to store value
+                    logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                    logValueDto.setValueResponse(node.get("value").asLong());
+                    Long valueId = valueService.getValueByName("temperature");
+                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
+                
+                }
+                if (valueNode != null && resourceId.equals("0.2.85")) {
+                    result.put("humidity", valueNode.asText().substring(0, 2));
+                    // input LogValue to store value
+                    logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                    logValueDto.setValueResponse(node.get("value").asLong());
+                    Long valueId = valueService.getValueByName("humidity");
+                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
+                }
+                result.put("timeStamp", timeStamp);
+            }
+           } catch (Exception e) {
+            throw new RuntimeException("Error processing JSON response", e);
+        }
+        return result;
+    }
+
 }

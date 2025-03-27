@@ -60,4 +60,15 @@ public class ValueServiceImplementation implements ValueService {
         Value updatedValue = valueRepository.save(value);
         return ValueMapper.mapToValueDto(updatedValue);
     }
+
+    @Override
+    public Long getValueByName(String nameValue) {
+        List<Value> values = valueRepository.findAll();
+        for(Value i:values){
+            if(i.getValueName().equals(nameValue)){
+                return i.getValueId();
+            };
+        }
+       return null;
+    }
 }
