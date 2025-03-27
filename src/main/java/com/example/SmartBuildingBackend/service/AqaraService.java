@@ -13,10 +13,6 @@ public interface AqaraService {
 
     String queryDetailsAttributes(Map<String, Object> requestBody, String model, String resourceId) throws Exception;
 
-
-    //ResourceId is set in site the function 0.1.85
-    String queryTemparatureAttributes() throws Exception;
-
     String convertToJson(Map<String, Object> request);
 
     String authorizationVerificationCode() throws Exception;
@@ -26,10 +22,8 @@ public interface AqaraService {
     String ObtainAccessToken() throws Exception;
 
     String refreshToken() throws Exception;
-}
-
-
-    String convertToJson(Map<String, Object> request);
 
     ObjectNode getJsonAPIFromServer(String response,EquipmentDto equipmentDto);
+    
+    String queryTemparatureAttributes(String deviceId) throws Exception;
 }
