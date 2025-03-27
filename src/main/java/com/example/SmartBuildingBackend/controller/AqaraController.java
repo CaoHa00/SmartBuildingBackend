@@ -17,7 +17,9 @@ import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.AllArgsConstructor;
@@ -68,43 +70,16 @@ public class AqaraController {
     @PostMapping("/currentValue")
     public ResponseEntity<String> queryAttributes(@RequestBody EquipmentDto equipmentDto) {
         try {
-
-            String response = aqaraService.queryTemparatureAttributes();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(response);
-            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
-            // Change the default JSON return from AQARA for readability
-            ObjectNode result = objectMapper.createObjectNode(); 
-            for (JsonNode node : resultArray) {
-                JsonNode valueNode = node.get("value");
-                String resouceId = node.get("resourceId").asText();
-                String timeStamp = node.get("timeStamp").asText();
-                //write temperature
-                if (valueNode != null && resouceId.equals("0.1.85")) {
-                    // ((ObjectNode) node).put("temperature", valueNode.asText().substring(0,2)); // Copy value
-                    result.put("temperature", valueNode.asText().substring(0,2));
-                }
-                //write humidity
-                if (valueNode != null && resouceId.equals("0.2.85")) {
-                    // ((ObjectNode) node).put("humidity", valueNode.asText().substring(0,2)); // Copy value
-                    result.put("humidity", valueNode.asText().substring(0,2));
-                }
-                result.put("timeStamp", timeStamp);
-            }
-            String updatedResponse = objectMapper.writeValueAsString(result);
-
             //get Response from Chinese server
             String response = aqaraService.queryTemparatureAttributes(equipmentDto.getDeviceId());
             // directly get the processed JSON response
             ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,equipmentDto);
             String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
-
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
-
-    } 
+    }
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
         try {

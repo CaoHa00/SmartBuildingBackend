@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 
-import com.example.SmartBuildingBackend.configuration.AqaraConfig;
+
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 
@@ -88,6 +88,7 @@ public class AqaraServiceImplemetation implements AqaraService {
     private String sendAqaraRequest(Map<String, Object> requestBody) throws Exception {
         AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc() // Get the latest config
                 .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
+
         String nonce = UUID.randomUUID().toString().replace("-", "");
         String time = String.valueOf(System.currentTimeMillis());
         // Generate Sign
@@ -164,7 +165,7 @@ public class AqaraServiceImplemetation implements AqaraService {
         Map<String, Object> data = new HashMap<>();
         data.put("account", "cao.ha@eiu.edu.vn");
         data.put("accountType", 0);
-        data.put("accessTokenValidity", "1h");
+        data.put("accessTokenValidity", "1y");
         requestBody.put("data", data);
         return sendAqaraRequest(requestBody);
     }
@@ -341,5 +342,7 @@ public class AqaraServiceImplemetation implements AqaraService {
         }
         return result;
     }
+
+   
 
 }
