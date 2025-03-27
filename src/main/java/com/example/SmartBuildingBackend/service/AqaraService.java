@@ -11,7 +11,16 @@ public interface AqaraService {
 
     //ResourceId is set in site the function 0.1.85
     String queryTemparatureAttributes() throws Exception;
-     String convertToJson(Map<String, Object> request);
+
+    String convertToJson(Map<String, Object> request);
+
+    String authorizationVerificationCode() throws Exception;
+
+    String createVirtualAccount() throws Exception;
+
+    String ObtainAccessToken() throws Exception;
+
+    String refreshToken() throws Exception;
 }
 
     
