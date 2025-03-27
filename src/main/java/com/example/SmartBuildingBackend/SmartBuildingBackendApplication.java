@@ -7,5 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SmartBuildingBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SmartBuildingBackendApplication.class, args);
+		
 	}
 }

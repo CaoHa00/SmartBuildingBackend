@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class CreateSign {
-
+    
     public static String createSign(String accessToken, String appId, String keyId, String nonce, String time, String appKey) throws Exception {
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(accessToken)) {

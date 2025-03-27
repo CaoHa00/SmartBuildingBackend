@@ -13,4 +13,6 @@ public interface ValueService {
     ValueDto getValueById(Long valueId);
 
     ValueDto updateValue(Long valueId, ValueDto valueDto);
+
+    Long getValueByName(String nameValue);
 }
