@@ -106,6 +106,7 @@ public class AqaraController {
             String response = aqaraService.ObtainAccessToken();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response);
+
             // lấy dữ liệu ra từ database
             AqaraConfig aqaraConfig  = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
             .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database")); 
@@ -128,6 +129,7 @@ public class AqaraController {
                     System.out.println(" Refresh Token Updated: " + newRefreshToken);
                 } else {
                     System.err.println("Missing accessToken or refreshToken in response.");
+
                 }
             } else {
                 System.err.println("'result' field is missing in the API response.");
