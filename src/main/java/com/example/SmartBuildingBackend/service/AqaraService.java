@@ -24,9 +24,10 @@ public interface AqaraService {
 
     String refreshToken() throws Exception;
 
-    ObjectNode getJsonAPIFromServer(String response, EquipmentDto equipmentDto);
+    ObjectNode getJsonAPIFromServer(String response, Long equipmentId);
 
-    String queryTemparatureAttributes(String deviceId) throws Exception;
+    String queryTemparatureAttributes(Long equipmentId) throws Exception;
 
     JSONObject compareTemperature();
+
 }

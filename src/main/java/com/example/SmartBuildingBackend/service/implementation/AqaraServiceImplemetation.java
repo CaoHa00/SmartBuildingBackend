@@ -28,6 +28,7 @@ import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.ValueService;
 import com.example.SmartBuildingBackend.service.WeatherService;
@@ -65,6 +66,7 @@ public class AqaraServiceImplemetation implements AqaraService {
     private final ValueService valueService;
     private static int DEFAULT_TEMPERATURE = 0;
     private final WeatherService weatherService;
+    private EquipmentService equipmentService;
 
     @Override
     public String sendRequestToAqara(Map<String, Object> requestBody) throws Exception {
@@ -120,15 +122,15 @@ public class AqaraServiceImplemetation implements AqaraService {
     }
 
     @Override
-    public String queryTemparatureAttributes(String deviceId)
+    public String queryTemparatureAttributes(Long equipmentId)
             throws Exception {
-
+        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("intent", "query.resource.value");
 
         // Create a single resource entry
         Map<String, Object> resource = new HashMap<>();
-        resource.put("subjectId", deviceId);
+        resource.put("subjectId", equipmentDto.getDeviceId());
 
         // Add resourceIds as a List
         List<String> resourceIds = new ArrayList<>();
@@ -308,7 +310,8 @@ public class AqaraServiceImplemetation implements AqaraService {
 
     // method to process API response from CHINA
     @Override
-    public ObjectNode getJsonAPIFromServer(String response, EquipmentDto equipmentDto) {
+    public ObjectNode getJsonAPIFromServer(String response, Long equipmentId) {
+        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode result = objectMapper.createObjectNode();
         try {

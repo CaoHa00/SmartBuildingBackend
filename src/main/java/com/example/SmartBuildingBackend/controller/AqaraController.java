@@ -6,9 +6,11 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
@@ -18,6 +20,7 @@ import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,6 +33,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
+    private final EquipmentService equipmentService;
 
     private AqaraConfigRepository aqaraConfigRepository;
 
@@ -71,12 +75,12 @@ public class AqaraController {
     }
 
     @PostMapping("/currentValue")
-    public ResponseEntity<String> queryAttributes(@RequestBody EquipmentDto equipmentDto) {
+    public ResponseEntity<String> queryAttributes(@RequestParam Long equipmentId) {
         try {
             // get Response from Chinese server
-            String response = aqaraService.queryTemparatureAttributes(equipmentDto.getDeviceId());
+            String response = aqaraService.queryTemparatureAttributes(equipmentId);
             // directly get the processed JSON response
-            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentDto);
+            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId);
             String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
