@@ -33,7 +33,7 @@ public class Equipment {
 
     @Column(name = "equipment_name", nullable = false)
     private String equipmentName;
-    
+
     @Column(name = "device_id", nullable = false)
     private String deviceId;
 
