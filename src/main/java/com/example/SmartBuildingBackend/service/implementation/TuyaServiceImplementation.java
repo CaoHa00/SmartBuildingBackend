@@ -123,6 +123,7 @@ public class TuyaServiceImplementation implements TuyaService {
 
     @Override
     public String extractPropertiesFromResponse(String responseBody) {
+        JSONObject valueJson = new JSONObject();
         try {
 
             JSONObject jsonResponse = new JSONObject(responseBody);
@@ -134,25 +135,34 @@ public class TuyaServiceImplementation implements TuyaService {
                 JSONObject property = properties.getJSONObject(i);
                 String code = property.getString("code");
                 Object value = property.get("value");
-
                 // Check for the specific codes we're interested in
-                if ("phase_a".equals(code)) {
+                if ("forward_energy_total".equals(code)) {
+                    double energyTotal = ((Number) value).doubleValue() / 100.0;
+                    valueJson.put("forward_energy_total", energyTotal);
+                } else if ("phase_a".equals(code)) {
                     if (value instanceof String) {
-                        return parsePhaseA((String) value); // Parse and return the extracted values
+                        JSONObject val = parsePhaseA((String) value);
+                        valueJson.put("voltage", val.getDouble("voltage"));
+                        valueJson.put("current", val.getDouble("current"));
+                        valueJson.put("power", val.getDouble("power"));
+                        break;
                     } else {
                         return "Invalid phase_a value format.";
                     }
                 }
             }
+            valueJson.put("timestamp", jsonResponse.getLong("t"));
+
         } catch (Exception e) {
             e.printStackTrace();
             return "Error processing response: " + e.getMessage();
         }
-        return "No phase_a data found";
+        return valueJson.toString();
     }
 
     @Override
-    public String parsePhaseA(String base64Value) {
+    public JSONObject parsePhaseA(String base64Value) {
+        JSONObject jsonResponse = new JSONObject();
         try {
             // Decode the Base64 encoded value
             byte[] decodedBytes = Base64.getDecoder().decode(base64Value);
@@ -169,22 +179,19 @@ public class TuyaServiceImplementation implements TuyaService {
                                                                                                      // power
 
             // Convert current and power to the required units
-            // double voltageInV = Math.round(voltage * 0.1 * 10.0) / 10.0; // Round to 1
-            // decimal place
-            // double currentInA = Math.round(current * 0.001 * 100.0) / 100.0; // Round to
-            // 2 decimal places
+            double voltageInV = Math.round(voltage * 0.1 * 10.0) / 10.0; // Round to 1 decimal place
+            double currentInA = Math.round(current * 0.001 * 100.0) / 100.0; // Round to 2 decimal places
             double powerInKW = Math.round(power * 0.001 * 100.0) / 100.0; // Round to 2 decimal places
 
-            JSONObject jsonResponse = new JSONObject();
-            // jsonResponse.put("voltage", voltageInV);
-            // jsonResponse.put("current", currentInA);
+            jsonResponse.put("voltage", voltageInV);
+            jsonResponse.put("current", currentInA);
             jsonResponse.put("power", powerInKW);
 
-            return jsonResponse.toString(); // Return JSON as a string
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error parsing phase_a data: " + e.getMessage();
+            e.getMessage();
         }
+        return jsonResponse;
     }
 
     @Override
