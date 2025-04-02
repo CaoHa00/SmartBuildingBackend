@@ -1,5 +1,6 @@
 package com.example.SmartBuildingBackend.service;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
@@ -23,7 +24,10 @@ public interface AqaraService {
 
     String refreshToken() throws Exception;
 
-    ObjectNode getJsonAPIFromServer(String response,EquipmentDto equipmentDto);
-    
-    String queryTemparatureAttributes(String deviceId) throws Exception;
+    ObjectNode getJsonAPIFromServer(String response, Long equipmentId);
+
+    String queryTemparatureAttributes(Long equipmentId) throws Exception;
+
+    JSONObject compareTemperature();
+
 }

@@ -55,19 +55,21 @@ public class EquipmentServiceImplementation implements EquipmentService {
     }
 
     @Override
-public EquipmentDto addEquipment(Long roomId, Long equipmentTypeId, EquipmentDto equipmentDto) {
-    Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
+    public EquipmentDto addEquipment(Long roomId, Long equipmentTypeId, EquipmentDto equipmentDto) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
 
-    EquipmentType equipmentType = equipmentTypeRepository.findById(equipmentTypeId)
-            .orElseThrow(() -> new RuntimeException("Equipment Type not found with id: " + equipmentTypeId));
+        EquipmentType equipmentType = equipmentTypeRepository.findById(equipmentTypeId)
+                .orElseThrow(() -> new RuntimeException("Equipment Type not found with id: " + equipmentTypeId));
 
-    Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
-    // equipment.setEquipmentName(equipmentDto.getEquipmentName());
-    // equipment.setDeviceId(equipmentDto.getDeviceId()); // Assuming EquipmentType has a 'typeName' field
-    equipment.setRoom(room);
-    equipment.setEquipmentType(equipmentType);
-    Equipment savedEquipment = equipmentRepository.save(equipment);
-    return EquipmentMapper.mapToEquipmentDto(savedEquipment);
-}
+        Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
+        // equipment.setEquipmentName(equipmentDto.getEquipmentName());
+        // equipment.setDeviceId(equipmentDto.getDeviceId()); // Assuming EquipmentType
+        // has a 'typeName' field
+        equipment.setRoom(room);
+        equipment.setEquipmentType(equipmentType);
+        Equipment savedEquipment = equipmentRepository.save(equipment);
+        return EquipmentMapper.mapToEquipmentDto(savedEquipment);
+    }
+
 }

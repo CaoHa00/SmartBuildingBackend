@@ -2,13 +2,16 @@ package com.example.SmartBuildingBackend.controller;
 
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.mapper.AqaraConfigMapper;
@@ -17,6 +20,7 @@ import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,14 +33,16 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
+    private final EquipmentService equipmentService;
 
     private AqaraConfigRepository aqaraConfigRepository;
 
     @PostMapping("/query-device-info")
     public ResponseEntity<String> queryDeviceInfo(@RequestBody Map<String, Object> requestBody) throws Exception {
-            String response = aqaraService.sendRequestToAqara(requestBody);
-            return ResponseEntity.ok(response);
+        String response = aqaraService.sendRequestToAqara(requestBody);
+        return ResponseEntity.ok(response);
     }
+
     @PostMapping("/query-resource-info")
     public ResponseEntity<String> queryResourceInfo(@RequestBody Map<String, Object> requestBody) {
         try {
@@ -53,7 +59,7 @@ public class AqaraController {
 
             Map<String, Object> dataMap = (Map<String, Object>) dataObj;
             String model = (String) dataMap.get("model");
-            String resourceId = (String) dataMap.get("resourceId"); 
+            String resourceId = (String) dataMap.get("resourceId");
 
             if (model == null || model.isEmpty()) {
                 return ResponseEntity.badRequest().body("Error: 'model' is required.");
@@ -62,34 +68,37 @@ public class AqaraController {
             // Call the service method
             String response = aqaraService.queryDetailsAttributes(requestBody, model, resourceId);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
+
     @PostMapping("/currentValue")
-    public ResponseEntity<String> queryAttributes(@RequestBody EquipmentDto equipmentDto) {
+    public ResponseEntity<String> queryAttributes(@RequestParam Long equipmentId) {
         try {
-            //get Response from Chinese server
-            String response = aqaraService.queryTemparatureAttributes(equipmentDto.getDeviceId());
+            // get Response from Chinese server
+            String response = aqaraService.queryTemparatureAttributes(equipmentId);
             // directly get the processed JSON response
-            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,equipmentDto);
+            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId);
             String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
+
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
         try {
             String response = aqaraService.authorizationVerificationCode();
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
+
     @PostMapping("/create-virtual-account")
     public ResponseEntity<String> createVirtualAccount() {
         try {
@@ -108,21 +117,22 @@ public class AqaraController {
             JsonNode rootNode = objectMapper.readTree(response);
 
             // lấy dữ liệu ra từ database
-            AqaraConfig aqaraConfig  = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
-            .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database")); 
-                       
+            AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
+                    .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
+
             if (rootNode.has("result")) {
                 JsonNode resultNode = rootNode.get("result");
 
                 // Extract tokens safely
                 String newAccessToken = resultNode.has("accessToken") ? resultNode.get("accessToken").asText() : null;
-                String newRefreshToken = resultNode.has("refreshToken") ? resultNode.get("refreshToken").asText() : null;
+                String newRefreshToken = resultNode.has("refreshToken") ? resultNode.get("refreshToken").asText()
+                        : null;
 
                 if (newAccessToken != null && newRefreshToken != null) {
-                  
+
                     aqaraConfig.setAccessToken(newAccessToken);
                     aqaraConfig.setRefreshToken(newRefreshToken);
-                    //cập nhập dữ liệu lại vào trong database
+                    // cập nhập dữ liệu lại vào trong database
                     AqaraConfig updateAqaraConfig = aqaraConfigRepository.save(aqaraConfig);
                     AqaraConfigMapper.mapToAqaraConfigDto(updateAqaraConfig);
                     System.out.println(" Access Token Updated: " + newAccessToken);
@@ -140,6 +150,7 @@ public class AqaraController {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
+
     @PostMapping("/refresh-token")
     public ResponseEntity<String> refreshTokenAccount() {
         try {
@@ -147,25 +158,26 @@ public class AqaraController {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response);
             // lấy dữ liệu ra từ database
-            AqaraConfig aqaraConfig  = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
-            .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database")); 
-                       
+            AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
+                    .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
+
             if (rootNode.has("result")) {
                 JsonNode resultNode = rootNode.get("result");
 
                 // Extract tokens safely
                 String newAccessToken = resultNode.has("accessToken") ? resultNode.get("accessToken").asText() : null;
-                String newRefreshToken = resultNode.has("refreshToken") ? resultNode.get("refreshToken").asText() : null;
+                String newRefreshToken = resultNode.has("refreshToken") ? resultNode.get("refreshToken").asText()
+                        : null;
                 String newOpenId = resultNode.has("openId") ? resultNode.get("openId").asText() : null;
                 String expiresIn = resultNode.has("expiresIn") ? resultNode.get("expiresIn").asText() : null;
 
                 if (newAccessToken != null && newRefreshToken != null) {
-                  
+
                     aqaraConfig.setAccessToken(newAccessToken);
                     aqaraConfig.setRefreshToken(newRefreshToken);
                     aqaraConfig.setOpendId(newOpenId);
                     aqaraConfig.setExpiresIn(expiresIn);
-                    //cập nhập dữ liệu lại vào trong database
+                    // cập nhập dữ liệu lại vào trong database
                     AqaraConfig updateAqaraConfig = aqaraConfigRepository.save(aqaraConfig);
                     AqaraConfigMapper.mapToAqaraConfigDto(updateAqaraConfig);
                     System.out.println(" Access Token Updated: " + newAccessToken);
@@ -183,6 +195,11 @@ public class AqaraController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
+    }
 
+    @GetMapping("compare-temperature")
+    public ResponseEntity<String> compareTemperature() {
+        JSONObject json = aqaraService.compareTemperature();
+        return ResponseEntity.ok().body(json.toString());
     }
 }
