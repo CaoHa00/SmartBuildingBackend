@@ -1,6 +1,5 @@
 package com.example.SmartBuildingBackend.service.implementation;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -9,10 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,8 +37,6 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.MessagePart;
-import com.google.gson.JsonObject;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +51,7 @@ import org.jsoup.nodes.Document;
 
 @Service
 @AllArgsConstructor
-public class AqaraServiceImplemetation implements AqaraService {
+public class AqaraServiceImplementation implements AqaraService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final AqaraConfigRepository aqaraConfigRepository;
