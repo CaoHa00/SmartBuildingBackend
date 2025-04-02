@@ -1,4 +1,5 @@
 package com.example.SmartBuildingBackend.controller;
+
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 import com.example.SmartBuildingBackend.service.LogValueService;
 
@@ -20,6 +21,7 @@ public class LogValueController {
     public ResponseEntity<LogValueDto> addLogValue(@RequestParam Long equipmentId, @RequestParam Long valueId,
             @RequestBody LogValueDto logValueDto) {
         LogValueDto savedLogValue = logValueService.addLogValue(equipmentId, valueId, logValueDto);
+
         return ResponseEntity.ok(savedLogValue);
     }
 
@@ -53,5 +55,4 @@ public class LogValueController {
         return ResponseEntity.ok("LogValue deleted successfully.");
     }
 
-   
 }
