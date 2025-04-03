@@ -3,6 +3,7 @@ package com.example.SmartBuildingBackend.dto;
 
 import java.util.List;
 
+import com.example.SmartBuildingBackend.entity.Category;
 import com.example.SmartBuildingBackend.entity.EquipmentType;
 import com.example.SmartBuildingBackend.entity.LogValue;
 import com.example.SmartBuildingBackend.entity.Room;
@@ -30,4 +31,5 @@ public class EquipmentDto {
     
     private Room room;
     private List<LogValue> logValues;
+    private Category category;
 }

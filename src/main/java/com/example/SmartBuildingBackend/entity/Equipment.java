@@ -51,4 +51,8 @@ public class Equipment {
     @JsonManagedReference(value = "equipment")
     private List<LogValue> logValues;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    @JsonBackReference(value = "category-ref")
+    private Category category;
 }
