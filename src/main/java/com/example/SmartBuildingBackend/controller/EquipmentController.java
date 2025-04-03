@@ -29,8 +29,8 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @PostMapping
-    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam Long roomId, @RequestParam Long equipmentTypeId , @RequestBody EquipmentDto equipmentDto) {
-        EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentTypeId,equipmentDto);
+    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam Long roomId, @RequestParam Long equipmentTypeId, @RequestParam Long categoryId , @RequestBody EquipmentDto equipmentDto) {
+        EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentTypeId,categoryId,equipmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEquipment);
     }
 
