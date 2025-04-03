@@ -6,12 +6,14 @@ import com.example.SmartBuildingBackend.entity.Equipment;
 public class EquipmentMapper {
         public static EquipmentDto mapToEquipmentDto(Equipment equipment) {
                 return new EquipmentDto(
-                                equipment.getEquipmentId(),
-                                equipment.getEquipmentName(),
-                                equipment.getDeviceId(),
-                                equipment.getEquipmentType(),
-                                equipment.getRoom(),
-                                equipment.getLogValues());
+                        equipment.getEquipmentId(),
+                        equipment.getEquipmentName(),
+                        equipment.getDeviceId(),
+                        equipment.getEquipmentType(),
+                        equipment.getRoom(),
+                        equipment.getLogValues(),
+                        equipment.getCategory()
+                );
         }
 
         public static Equipment mapToEquipment(EquipmentDto equipmentDto) {
@@ -21,6 +23,8 @@ public class EquipmentMapper {
                                 equipmentDto.getDeviceId(),
                                 equipmentDto.getEquipmentType(),
                                 equipmentDto.getRoom(),
-                                equipmentDto.getLogValues());
+                                equipmentDto.getLogValues(),
+                                equipmentDto.getCategory()
+                        );
         }
 }
