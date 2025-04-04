@@ -3,7 +3,6 @@ package com.example.SmartBuildingBackend.service;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Map;

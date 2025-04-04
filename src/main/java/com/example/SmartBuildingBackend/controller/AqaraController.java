@@ -3,10 +3,8 @@ package com.example.SmartBuildingBackend.controller;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,13 +15,9 @@ import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.mapper.AqaraConfigMapper;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
-
 import com.example.SmartBuildingBackend.service.AqaraService;
-import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.AllArgsConstructor;
@@ -33,8 +27,6 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
-    private final EquipmentService equipmentService;
-
     private AqaraConfigRepository aqaraConfigRepository;
 
     @PostMapping("/query-device-info")
