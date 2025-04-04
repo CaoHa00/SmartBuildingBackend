@@ -20,9 +20,7 @@ import org.springframework.http.MediaType;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
-import com.example.SmartBuildingBackend.dto.ValueDto;
 import com.example.SmartBuildingBackend.entity.Equipment;
-import com.example.SmartBuildingBackend.entity.LogValue;
 import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.example.SmartBuildingBackend.service.LogValueService;
@@ -40,15 +38,6 @@ public class TuyaServiceImplementation implements TuyaService {
     private String clientId;
     private String secret;
     private String baseUrl;
-
-    // @Value("${tuya.client.id}")
-    // private String CLIENT_ID;
-
-    // @Value("${tuya.secret}")
-    // private String SECRET;
-
-    // @Value("${tuya.base.url}")
-    // private String BASE_URL;
 
     @Autowired
     public TuyaServiceImplementation(TuyaSignatureHelper tuyaSignatureHelper, EquipmentService equipmentService,
@@ -137,6 +126,7 @@ public class TuyaServiceImplementation implements TuyaService {
     @Override
     public String extractPropertiesFromResponse(String responseBody, EquipmentDto equipmentDto) {
         JSONObject valueJson = new JSONObject();
+        JSONObject sendJson = new JSONObject();
         Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
         double energyTotal = 0;
         Long time = (long) 0;
@@ -156,12 +146,17 @@ public class TuyaServiceImplementation implements TuyaService {
                 if ("forward_energy_total".equals(code)) {
                     energyTotal = ((Number) value).doubleValue() / 100.0;
                     valueJson.put("total power", energyTotal);
+                    sendJson.put("forward_energy_power", energyTotal);
                 } else if ("phase_a".equals(code)) {
                     if (value instanceof String) {
                         JSONObject val = parsePhaseA((String) value);
                         valueJson.put("voltage", val.getDouble("voltage"));
                         valueJson.put("current", val.getDouble("current"));
                         valueJson.put("active power", val.getDouble("power"));
+                        // sent to front
+                        sendJson.put("voltage", val.getDouble("voltage"));
+                        sendJson.put("current", val.getDouble("current"));
+                        sendJson.put("active_power", val.getDouble("power"));
                         break;
                     } else {
                         return "Invalid phase_a value format.";
@@ -178,13 +173,13 @@ public class TuyaServiceImplementation implements TuyaService {
                 logValueService.addLogValue(equipment.getEquipmentId(), valueId, logValueDto);
             }
 
-            valueJson.put("timestamp", jsonResponse.getLong("t"));
+            sendJson.put("timestamp", jsonResponse.getLong("t"));
 
         } catch (Exception e) {
             e.printStackTrace();
             return "Error processing response: " + e.getMessage();
         }
-        return valueJson.toString();
+        return sendJson.toString();
     }
 
     @Override
@@ -194,13 +189,10 @@ public class TuyaServiceImplementation implements TuyaService {
             // Decode the Base64 encoded value
             byte[] decodedBytes = Base64.getDecoder().decode(base64Value);
 
-            // Assuming the decoded data format: [voltage (2 bytes), current (3 bytes),
-            // power (3 bytes)]
-            // Example: A phase_a string like "CPUAO7oACNo=" is decoded into byte array
-
             // Extract voltage, current, and power
             int voltage = (decodedBytes[0] << 8) | (decodedBytes[1] & 0xFF); // 2 bytes for voltage
-            int current = (decodedBytes[2] << 16) | (decodedBytes[3] << 8) | (decodedBytes[4] & 0xFF); // 3 bytes for //
+            int current = (decodedBytes[2] << 16) | (decodedBytes[3] << 8) | (decodedBytes[4] & 0xFF); // 3 bytes for
+                                                                                                       // current //
                                                                                                        // current
             int power = (decodedBytes[5] << 16) | (decodedBytes[6] << 8) | (decodedBytes[7] & 0xFF); // 3 bytes for
                                                                                                      // power
@@ -227,7 +219,7 @@ public class TuyaServiceImplementation implements TuyaService {
         long timestamp = System.currentTimeMillis();
         String nonce = tuyaSignatureHelper.generateNonce();
 
-        // 🔥 Include accessToken in the signature
+        // Include accessToken in the signature
         String sign = tuyaSignatureHelper.generateSignatureWithAccessToken(clientId, accessToken, secret, timestamp,
                 nonce, method, body, url);
 
@@ -246,12 +238,6 @@ public class TuyaServiceImplementation implements TuyaService {
     }
 
     @Override
-    public LogValueDto addLogValue(LogValueDto logValueDto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addLogValue'");
-    }
-
-    @Override
     public String getListDevicesProperty() {
         getAccessToken();
         String[] devices = { "6cf85b50df5c642854bo2n" };
@@ -264,4 +250,9 @@ public class TuyaServiceImplementation implements TuyaService {
         return responseBody;
     }
 
+    @Override
+    public LogValueDto addLogValue() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addLogValue'");
+    }
 }

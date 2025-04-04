@@ -65,7 +65,7 @@ public class ValueServiceImplementation implements ValueService {
     public Long getValueByName(String nameValue) {
         List<Value> values = valueRepository.findAll();
         for(Value i:values){
-            if(i.getValueName().equals(nameValue)){
+            if(i.getValueName().equalsIgnoreCase(nameValue)){
                 return i.getValueId();
             };
         }
