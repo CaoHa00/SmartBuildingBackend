@@ -3,6 +3,7 @@ package com.example.SmartBuildingBackend.service;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 
+import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 
 public interface TuyaService {
@@ -12,7 +13,7 @@ public interface TuyaService {
 
     String getDeviceProperty(Long equipmentId);
 
-    String extractPropertiesFromResponse(String responseBody);
+    String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
 
     JSONObject parsePhaseA(String base64Value);
 

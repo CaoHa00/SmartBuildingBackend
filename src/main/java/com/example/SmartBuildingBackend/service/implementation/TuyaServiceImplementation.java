@@ -1,6 +1,8 @@
 package com.example.SmartBuildingBackend.service.implementation;
 
 import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -18,16 +20,23 @@ import org.springframework.http.MediaType;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
+import com.example.SmartBuildingBackend.dto.ValueDto;
+import com.example.SmartBuildingBackend.entity.Equipment;
+import com.example.SmartBuildingBackend.entity.LogValue;
 import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.service.EquipmentService;
+import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.TuyaService;
 import com.example.SmartBuildingBackend.service.TuyaSignatureHelper;
+import com.example.SmartBuildingBackend.service.ValueService;
 
 @Service
 public class TuyaServiceImplementation implements TuyaService {
 
     private TuyaSignatureHelper tuyaSignatureHelper;
     private EquipmentService equipmentService;
+    private LogValueService logValueService;
+    private ValueService valueService;
     private String clientId;
     private String secret;
     private String baseUrl;
@@ -43,6 +52,8 @@ public class TuyaServiceImplementation implements TuyaService {
 
     @Autowired
     public TuyaServiceImplementation(TuyaSignatureHelper tuyaSignatureHelper, EquipmentService equipmentService,
+            ValueService valueService,
+            LogValueService logValueService,
             @Value("${tuya.client.id}") String clientId, @Value("${tuya.secret}") String secret,
             @Value("${tuya.base.url}") String baseUrl) {
         this.tuyaSignatureHelper = tuyaSignatureHelper;
@@ -50,6 +61,8 @@ public class TuyaServiceImplementation implements TuyaService {
         this.secret = secret;
         this.baseUrl = baseUrl;
         this.equipmentService = equipmentService;
+        this.logValueService = logValueService;
+        this.valueService = valueService;
 
     }
 
@@ -105,8 +118,8 @@ public class TuyaServiceImplementation implements TuyaService {
 
     @Override
     public String getDeviceProperty(Long equipmentId) {
-        EquipmentDto equipment = equipmentService.getEquipmentById(equipmentId);
-        String deviceId = equipment.getDeviceId();
+        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
+        String deviceId = equipmentDto.getDeviceId();
         getAccessToken();
         String method = "GET";
         String body = "";
@@ -116,41 +129,55 @@ public class TuyaServiceImplementation implements TuyaService {
         String responseBody = response.getBody();
 
         if (response.getStatusCode() == HttpStatus.OK && responseBody != null) {
-            return extractPropertiesFromResponse(responseBody);
+            return extractPropertiesFromResponse(responseBody, equipmentDto);
         }
         return responseBody;
     }
 
     @Override
-    public String extractPropertiesFromResponse(String responseBody) {
+    public String extractPropertiesFromResponse(String responseBody, EquipmentDto equipmentDto) {
         JSONObject valueJson = new JSONObject();
+        Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
+        double energyTotal = 0;
+        Long time = (long) 0;
         try {
 
             JSONObject jsonResponse = new JSONObject(responseBody);
             JSONObject result = jsonResponse.getJSONObject("result");
             JSONArray properties = result.getJSONArray("properties");
-
+            time = jsonResponse.getLong("t");
             // Extract "phase_a" (which contains raw data for voltage, current, and power)
             for (int i = 0; i < properties.length(); i++) {
                 JSONObject property = properties.getJSONObject(i);
                 String code = property.getString("code");
                 Object value = property.get("value");
+
                 // Check for the specific codes we're interested in
                 if ("forward_energy_total".equals(code)) {
-                    double energyTotal = ((Number) value).doubleValue() / 100.0;
-                    valueJson.put("forward_energy_total", energyTotal);
+                    energyTotal = ((Number) value).doubleValue() / 100.0;
+                    valueJson.put("total power", energyTotal);
                 } else if ("phase_a".equals(code)) {
                     if (value instanceof String) {
                         JSONObject val = parsePhaseA((String) value);
                         valueJson.put("voltage", val.getDouble("voltage"));
                         valueJson.put("current", val.getDouble("current"));
-                        valueJson.put("power", val.getDouble("power"));
+                        valueJson.put("active power", val.getDouble("power"));
                         break;
                     } else {
                         return "Invalid phase_a value format.";
                     }
                 }
             }
+            Iterator<String> keys = valueJson.keys();
+            while (keys.hasNext()) {
+                String keyName = keys.next(); // this is the key
+                Long valueId = valueService.getValueByName(keyName);
+                LogValueDto logValueDto = new LogValueDto();
+                logValueDto.setTimeStamp(time);
+                logValueDto.setValueResponse(valueJson.getDouble(keyName)); // or val.get(keyName)
+                logValueService.addLogValue(equipment.getEquipmentId(), valueId, logValueDto);
+            }
+
             valueJson.put("timestamp", jsonResponse.getLong("t"));
 
         } catch (Exception e) {

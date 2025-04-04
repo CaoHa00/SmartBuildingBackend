@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +27,6 @@ public class LogValueDto {
     private Value value;
 
     @NotNull(message = "value response is required")
-    private long valueResponse;
+    private Double valueResponse;
 
 }
