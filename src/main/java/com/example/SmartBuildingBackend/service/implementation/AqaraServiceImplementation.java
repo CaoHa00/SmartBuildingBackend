@@ -148,6 +148,71 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     @Override
+    public String queryLightControl(Long equipmentId, Long value, Long buttonPosition) throws Exception {
+        // Retrieve equipment details
+        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
+
+        // Initialize the request body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "write.resource.device");
+
+        // Create a list to hold resource maps
+        List<Map<String, Object>> resourcesList = new ArrayList<>();
+
+        // Create a map for the resource
+        Map<String, Object> resourceMap = new HashMap<>();
+        if(buttonPosition==1){ // upperButton
+            resourceMap.put("resourceId", "4.1.85"); // Set the appropriate resource ID
+            if(value==0){
+                resourceMap.put("value", "0"); // Set the desired value
+            }
+            if(value==1){
+                resourceMap.put("value", "1"); // Set the desired value
+            }
+            resourcesList.add(resourceMap);
+        }
+
+        if(buttonPosition==0){ // belowButton
+            resourceMap.put("resourceId", "4.2.85"); // Set the appropriate resource ID
+            if(value==0){
+                resourceMap.put("value", "0"); // Set the desired value
+            }
+            if(value==1){
+                resourceMap.put("value", "1"); // Set the desired value
+            }
+            resourcesList.add(resourceMap);
+        }
+        if (buttonPosition == 2) {
+            // top button
+            Map<String, Object> resourceMap1 = new HashMap<>();
+            resourceMap1.put("resourceId", "4.1.85");
+            resourceMap1.put("value", String.valueOf(value));
+            resourcesList.add(resourceMap1);
+        
+            // bottom button
+            Map<String, Object> resourceMap2 = new HashMap<>();
+            resourceMap2.put("resourceId", "4.2.85");
+            resourceMap2.put("value", String.valueOf(value));
+            resourcesList.add(resourceMap2);
+        }
+
+        // Create the data object with subjectId and resources
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("subjectId", equipmentDto.getDeviceId()); // Set the device ID
+        dataMap.put("resources", resourcesList);
+
+        // Wrap the data object in a list as required by the API
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        dataList.add(dataMap);
+
+        // Add the data list to the request body
+        requestBody.put("data", dataList);
+
+        // Send the request and return the response
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
     public String convertToJson(Map<String, Object> request) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -306,7 +371,6 @@ public class AqaraServiceImplementation implements AqaraService {
     // method to process API response from CHINA
     @Override
     public ObjectNode getJsonAPIFromServer(String response, Long equipmentId) {
-        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode result = objectMapper.createObjectNode();
         try {
@@ -328,7 +392,7 @@ public class AqaraServiceImplementation implements AqaraService {
                     logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                     logValueDto.setValueResponse(node.get("value").asDouble());
                     Long valueId = valueService.getValueByName("temperature");
-                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
+                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
 
                 }
                 if (valueNode != null && resourceId.equals("0.2.85")) {
@@ -337,7 +401,7 @@ public class AqaraServiceImplementation implements AqaraService {
                     logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                     logValueDto.setValueResponse(node.get("value").asDouble());
                     Long valueId = valueService.getValueByName("humidity");
-                    logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
+                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
                 }
                 result.put("timeStamp", timeStamp);
             }

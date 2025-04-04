@@ -1,5 +1,6 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -79,6 +80,12 @@ public class AqaraController {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
+    
+     @PostMapping("/light-control")
+    public ResponseEntity<String> controlLight(@RequestParam Long equipmentID, Long value, Long buttonPosition) throws Exception {
+        String response = aqaraService.queryLightControl(equipmentID,value,buttonPosition);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
@@ -107,6 +114,7 @@ public class AqaraController {
             String response = aqaraService.ObtainAccessToken();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response);
+
             // lấy dữ liệu ra từ database
             AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc()
                     .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
@@ -130,6 +138,7 @@ public class AqaraController {
                     System.out.println(" Refresh Token Updated: " + newRefreshToken);
                 } else {
                     System.err.println("Missing accessToken or refreshToken in response.");
+
                 }
             } else {
                 System.err.println("'result' field is missing in the API response.");
