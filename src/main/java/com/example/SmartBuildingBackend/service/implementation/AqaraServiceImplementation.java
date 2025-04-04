@@ -326,7 +326,7 @@ public class AqaraServiceImplementation implements AqaraService {
                     DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
                     // input LogValue to store value
                     logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                    logValueDto.setValueResponse(node.get("value").asLong());
+                    logValueDto.setValueResponse(node.get("value").asDouble());
                     Long valueId = valueService.getValueByName("temperature");
                     logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
 
@@ -335,7 +335,7 @@ public class AqaraServiceImplementation implements AqaraService {
                     result.put("humidity", valueNode.asText().substring(0, 2));
                     // input LogValue to store value
                     logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                    logValueDto.setValueResponse(node.get("value").asLong());
+                    logValueDto.setValueResponse(node.get("value").asDouble());
                     Long valueId = valueService.getValueByName("humidity");
                     logValueService.addLogValue(equipmentDto.getEquipmentId(), valueId, logValueDto);
                 }

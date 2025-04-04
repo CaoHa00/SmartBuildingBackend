@@ -1,5 +1,6 @@
 package com.example.SmartBuildingBackend.entity;
 
+import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,10 +39,10 @@ public class LogValue {
     private Equipment equipment;
 
     @ManyToOne
-    @JoinColumn(name="value_id")
+    @JoinColumn(name = "value_id")
     @JsonBackReference(value = "value")
     private Value value;
 
     @Column(name = "value")
-    private Long valueResponse; // actual value 
+    private Double valueResponse; // actual value
 }
