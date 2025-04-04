@@ -250,4 +250,9 @@ public class TuyaServiceImplementation implements TuyaService {
         return responseBody;
     }
 
+    @Override
+    public LogValueDto addLogValue() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addLogValue'");
+    }
 }
