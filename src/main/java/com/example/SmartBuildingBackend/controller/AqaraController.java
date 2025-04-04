@@ -1,5 +1,6 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -78,6 +79,12 @@ public class AqaraController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
+    }
+    
+     @PostMapping("/light-control")
+    public ResponseEntity<String> controlLight(@RequestParam Long equipmentID, Long value, Long buttonPosition) throws Exception {
+        String response = aqaraService.queryLightControl(equipmentID,value,buttonPosition);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/authorization-verification-code")
