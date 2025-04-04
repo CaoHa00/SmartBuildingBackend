@@ -19,7 +19,7 @@ public interface TuyaService {
 
     ResponseEntity<String> getResponse(String url, String method, String body);
 
-    LogValueDto addLogValue(LogValueDto logValueDto);
+    LogValueDto addLogValue();
 
     String getListDevicesProperty();
 }
