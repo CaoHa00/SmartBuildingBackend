@@ -8,20 +8,18 @@ public class LogValueMapper {
         return new LogValueDto(
                 logValue.getLogValueId(),
                 logValue.getTimeStamp(),
-                logValue.getEquipment(),
+                logValue.getEquipment() != null ? logValue.getEquipment().getEquipmentId() : null,
                 logValue.getValue(),
                 logValue.getValueResponse()
         );
     }
 
     public static LogValue mapToLogValue(LogValueDto logValueDto) {
-        return new LogValue(
-                logValueDto.getLogValueId(),
-                logValueDto.getTimeStamp(),
-                logValueDto.getEquipment(),
-                logValueDto.getValue(),
-                logValueDto.getValueResponse()
-                
-        );
+        LogValue  logValue = new LogValue();
+        logValue.setLogValueId(logValueDto.getLogValueId());
+        logValue.setTimeStamp(logValueDto.getTimeStamp());
+        logValue.setValue(logValueDto.getValue());
+        logValue.setValueResponse(logValueDto.getValueResponse());
+        return logValue;
     }
 }

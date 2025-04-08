@@ -1,8 +1,5 @@
 package com.example.SmartBuildingBackend.dto;
 
-import java.util.List;
-
-import com.example.SmartBuildingBackend.entity.LogValue;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -19,6 +16,5 @@ public class ValueDto {
     @NotBlank(message = "value name is required")
     private String valueName;
 
-    private List<LogValue> logValues;
 
 }

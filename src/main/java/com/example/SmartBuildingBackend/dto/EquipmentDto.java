@@ -27,9 +27,9 @@ public class EquipmentDto {
     private String deviceId;
 
     @NotBlank(message = "Equipment type is required")
-    private EquipmentType equipmentType;
+    private Long equipmentTypeId;
     
-    private Room room;
+    private Long roomId;
     private List<LogValue> logValues;
-    private Category category;
+    private Long categoryId;
 }

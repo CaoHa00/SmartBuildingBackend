@@ -7,16 +7,14 @@ public class ValueMapper {
     public static ValueDto mapToValueDto(Value value) {
         return new ValueDto(
                 value.getValueId(),
-                value.getValueName(),
-                value.getLogValues()
+                value.getValueName()
         );
     }
 
     public static Value mapToValue(ValueDto valueDto) {
         return new Value(
                 valueDto.getValueId(),
-                valueDto.getValueName(),
-                valueDto.getLogValues()
+                valueDto.getValueName()
         );
     }
 }
