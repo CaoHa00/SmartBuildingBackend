@@ -1,6 +1,5 @@
 package com.example.SmartBuildingBackend.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -72,8 +71,9 @@ public class AqaraController {
         try {
             // get Response from Chinese server
             String response = aqaraService.queryTemparatureAttributes(equipmentId);
+            Long value = (long) 0;
             // directly get the processed JSON response
-            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId);
+            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId,value);
             String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
             return ResponseEntity.ok(updatedResponse);
         } catch (Exception e) {
@@ -82,9 +82,11 @@ public class AqaraController {
     }
     
      @PostMapping("/light-control")
-    public ResponseEntity<String> controlLight(@RequestParam Long equipmentID, Long value, Long buttonPosition) throws Exception {
-        String response = aqaraService.queryLightControl(equipmentID,value,buttonPosition);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<String> controlLight(@RequestParam Long equipmentId, Long value, Long buttonPosition) throws Exception {
+        String response = aqaraService.queryLightControl(equipmentId,value,buttonPosition);
+        ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId,value);
+        String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
+        return ResponseEntity.ok(updatedResponse);
     }
 
     @PostMapping("/authorization-verification-code")

@@ -1,6 +1,5 @@
 package com.example.SmartBuildingBackend.entity;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

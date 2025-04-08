@@ -211,7 +211,56 @@ public class AqaraServiceImplementation implements AqaraService {
         // Send the request and return the response
         return sendAqaraRequest(requestBody);
     }
+    @Override
+    public ObjectNode getJsonAPIFromServer(String response, Long equipmentId, Long value) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode result = objectMapper.createObjectNode();
+        try {
+            JsonNode rootNode = objectMapper.readTree(response);
+            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
 
+            LogValueDto logValueDto = new LogValueDto();
+            for (JsonNode node : resultArray) {
+                if(node.get("value")!=null){
+                    JsonNode valueNode = node.get("value");
+                    String resourceId = node.get("resourceId").asText();
+                    String timeStamp = node.get("timeStamp").asText();
+    
+                    // Extract temperature value if the resourceId matches
+                    if (valueNode != null && resourceId.equals("0.1.85")) {
+                        String temperature = valueNode.asText().substring(0, 2);
+                        result.put("temperature", temperature);
+                        DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
+                        // input LogValue to store value
+                        logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                        logValueDto.setValueResponse(node.get("value").asDouble());
+                        Long valueId = valueService.getValueByName("temperature");
+                        logValueService.addLogValue(equipmentId, valueId, logValueDto);
+    
+                    }
+                    if (valueNode != null && resourceId.equals("0.2.85")) {
+                        result.put("humidity", valueNode.asText().substring(0, 2));
+                        // input LogValue to store value
+                        logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                        logValueDto.setValueResponse(node.get("value").asDouble());
+                        Long valueId = valueService.getValueByName("humidity");
+                        logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                    }
+                    result.put("timeStamp", timeStamp);
+                }
+                if(node.get("errorCode")!=null){
+                    Long valueId = valueService.getValueByName("light status");
+                    logValueDto.setTimeStamp(System.currentTimeMillis());
+                    logValueDto.setValueResponse((double)value);
+                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing JSON response", e);
+        }
+
+        return result;
+    }
     @Override
     public String convertToJson(Map<String, Object> request) {
         try {
@@ -369,47 +418,7 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     // method to process API response from CHINA
-    @Override
-    public ObjectNode getJsonAPIFromServer(String response, Long equipmentId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode result = objectMapper.createObjectNode();
-        try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
-
-            LogValueDto logValueDto = new LogValueDto();
-            for (JsonNode node : resultArray) {
-                JsonNode valueNode = node.get("value");
-                String resourceId = node.get("resourceId").asText();
-                String timeStamp = node.get("timeStamp").asText();
-
-                // Extract temperature value if the resourceId matches
-                if (valueNode != null && resourceId.equals("0.1.85")) {
-                    String temperature = valueNode.asText().substring(0, 2);
-                    result.put("temperature", temperature);
-                    DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
-                    // input LogValue to store value
-                    logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                    logValueDto.setValueResponse(node.get("value").asDouble());
-                    Long valueId = valueService.getValueByName("temperature");
-                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
-
-                }
-                if (valueNode != null && resourceId.equals("0.2.85")) {
-                    result.put("humidity", valueNode.asText().substring(0, 2));
-                    // input LogValue to store value
-                    logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                    logValueDto.setValueResponse(node.get("value").asDouble());
-                    Long valueId = valueService.getValueByName("humidity");
-                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
-                }
-                result.put("timeStamp", timeStamp);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing JSON response", e);
-        }
-        return result;
-    }
+  
 
     public JSONObject compareTemperature() {
         JSONObject json = new JSONObject();
