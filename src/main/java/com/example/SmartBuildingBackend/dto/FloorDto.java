@@ -1,7 +1,6 @@
 package com.example.SmartBuildingBackend.dto;
 import java.util.List;
 
-import com.example.SmartBuildingBackend.entity.Block;
 import com.example.SmartBuildingBackend.entity.Room;
 
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +18,6 @@ public class FloorDto {
     @NotBlank(message = "Floor name is required")
     private String floorName;
     // @NotBlank(message = "Block ID is required")
-    private Block block;
+    private Long blockId;
     private List<Room> rooms;
 }

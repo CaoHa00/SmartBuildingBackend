@@ -1,6 +1,5 @@
 package com.example.SmartBuildingBackend.dto;
 
-import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.entity.Value;
 
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +20,7 @@ public class LogValueDto {
     private long timeStamp;
 
     @NotNull(message = "Equipment type is required")
-    private Equipment equipment;
+    private Long equipmentId;
 
     @NotNull(message = "value is required")
     private Value value;

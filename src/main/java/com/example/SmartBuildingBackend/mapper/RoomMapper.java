@@ -4,21 +4,19 @@ import com.example.SmartBuildingBackend.dto.RoomDto;
 import com.example.SmartBuildingBackend.entity.Room;
 
 public class RoomMapper {
-    public static RoomDto mapToRoomDto(Room room) {
-        return new RoomDto(
-                room.getRoomId(),
-                room.getRoomName(),
-                room.getFloor(),
-                room.getEquipments()
-                );
+        public static RoomDto mapToRoomDto(Room room) {
+                return new RoomDto(
+                                room.getRoomId(),
+                                room.getRoomName(),
+                                room.getFloor() != null ? room.getFloor().getFloorId() : null,
+                                room.getEquipments());
         }
-    
-    public static Room mapToRoom (RoomDto roomDto) {
-        return new Room(
-                roomDto.getRoomId(),
-                roomDto.getRoomName(),
-                roomDto.getFloor(),
-                roomDto.getEquipments()
-                );
+
+        public static Room mapToRoom(RoomDto roomDto) {
+                Room room = new Room();
+                room.setEquipments(roomDto.getEquipments());
+                room.setRoomId(roomDto.getRoomId());
+                room.setRoomName(roomDto.getRoomName());
+                return room;
         }
 }
