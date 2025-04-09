@@ -39,7 +39,7 @@ public class LogValue {
 
     @ManyToOne
     @JoinColumn(name = "value_id")
-    @JsonBackReference(value = "value")
+ 
     private Value value;
 
     @Column(name = "value")
