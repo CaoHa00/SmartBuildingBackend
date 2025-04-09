@@ -39,7 +39,6 @@ public class LogValue {
 
     @ManyToOne
     @JoinColumn(name = "value_id")
- 
     private Value value;
 
     @Column(name = "value")
