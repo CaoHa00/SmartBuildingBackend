@@ -33,7 +33,7 @@ public class RoomServiceImplementation implements RoomService {
                 .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
         return RoomMapper.mapToRoomDto(room);
     }
-
+    
     @Override
     public RoomDto updateRoom(Long roomId, RoomDto updateRoomDto) {
         Room room = roomRepository.findById(roomId)
@@ -70,4 +70,5 @@ public class RoomServiceImplementation implements RoomService {
         Room savedRoom = roomRepository.save(room);
         return RoomMapper.mapToRoomDto(savedRoom);
     }
+
 }
