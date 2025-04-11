@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,18 +37,18 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newCategory);
     }
     @GetMapping("/{category_id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable("category_id") Long Id) {
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable("category_id") UUID Id) {
         CategoryDto category = categoryService.getCategoryById(Id);
         return ResponseEntity.ok(category);
     }
     @PutMapping("/{category_id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable("category_id") Long Id, 
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable("category_id") UUID Id, 
             @RequestBody CategoryDto categoryDto) {
         CategoryDto updatedCategory = categoryService.updateCategory(categoryDto, Id);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedCategory);
     }
     @DeleteMapping("/{category_id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable("category_id") Long id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable("category_id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok("Category deleted successfully");
     }

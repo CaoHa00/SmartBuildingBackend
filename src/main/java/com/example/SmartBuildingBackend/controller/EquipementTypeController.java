@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,19 +38,19 @@ public class EquipementTypeController {
     }
 
     @GetMapping("/{equipmentType_id}")
-    public ResponseEntity<EquipmentTypeDto> getEquipmentTypeById(@PathVariable("equipmentType_id") Long Id) {
+    public ResponseEntity<EquipmentTypeDto> getEquipmentTypeById(@PathVariable("equipmentType_id") UUID Id) {
         EquipmentTypeDto equipmentType = equipementTypeService.getEquipmentTypeById(Id);
         return ResponseEntity.status(HttpStatus.OK).body(equipmentType);
     }
 
     @PutMapping("/{equipmentType_id}")
-    public ResponseEntity<EquipmentTypeDto> updateEquipmentType(@PathVariable("equipmentType_id") Long Id) {
+    public ResponseEntity<EquipmentTypeDto> updateEquipmentType(@PathVariable("equipmentType_id") UUID Id) {
         equipementTypeService.deleteEquipementType(Id);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{equipmentType_id}")
-    public ResponseEntity<String> deleteEquipmentType(@PathVariable("equipmentType_id") Long id) {
+    public ResponseEntity<String> deleteEquipmentType(@PathVariable("equipmentType_id") UUID id) {
         equipementTypeService.deleteEquipementType(id);
         return ResponseEntity.ok("EquipmentType deleted successfully"); // 204 No Content response
     }

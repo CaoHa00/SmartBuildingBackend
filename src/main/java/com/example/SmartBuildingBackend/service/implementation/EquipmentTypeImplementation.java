@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.service.implementation;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class EquipmentTypeImplementation implements EquipementTypeService {
     }
 
     @Override
-    public EquipmentTypeDto updateEquipmentTypeDto(EquipmentTypeDto equipmentTypeDto, Long Id) {
+    public EquipmentTypeDto updateEquipmentTypeDto(EquipmentTypeDto equipmentTypeDto, UUID Id) {
         EquipmentType equipmentType = equipmentTypeRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Equipement type is not found:" + Id));
         equipmentType.setEquipmentTypeName(equipmentTypeDto.getEquipmentTypeName());
@@ -39,14 +40,14 @@ public class EquipmentTypeImplementation implements EquipementTypeService {
     }
 
     @Override
-    public EquipmentTypeDto getEquipmentTypeById(Long Id) {
+    public EquipmentTypeDto getEquipmentTypeById(UUID Id) {
         EquipmentType equipmentType = equipmentTypeRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Equipement type is not found:" + Id));
         return EquipmentTypeMapper.mapToEquipmentTypeDto(equipmentType);
     }
 
     @Override
-    public void deleteEquipementType(Long Id) {
+    public void deleteEquipementType(UUID Id) {
         EquipmentType equipmentType = equipmentTypeRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Equipement type is not found:" + Id));
         equipmentTypeRepository.delete(equipmentType);

@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.service;
 
+import java.util.UUID;
+
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 
@@ -11,7 +13,7 @@ public interface TuyaService {
 
     void fetchAccessToken();
 
-    String getDeviceProperty(Long equipmentId);
+    String getDeviceProperty(UUID equipmentId);
 
     String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
 

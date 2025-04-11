@@ -1,15 +1,17 @@
 package com.example.SmartBuildingBackend.entity;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.hibernate.annotations.UuidGenerator;
+
+import com.example.SmartBuildingBackend.entity.campus.Space;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -28,8 +30,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Equipment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long equipmentId;
+    @UuidGenerator
+    @Column(name = "equipment_id", updatable = false, nullable = false)
+    private UUID equipmentId;
 
     @Column(name = "equipment_name", nullable = false)
     private String equipmentName;
@@ -43,9 +46,9 @@ public class Equipment {
     private EquipmentType equipmentType;
 
     @ManyToOne
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "space_id")
     @JsonBackReference
-    private Room room;
+    private Space space;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "equipment")

@@ -1,6 +1,4 @@
-package com.example.SmartBuildingBackend.dto;
-
-
+package com.example.SmartBuildingBackend.dto.campus;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
@@ -12,9 +10,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValueDto {
-    private UUID valueId;
+public class SpaceTypeDto {
+    private UUID spaceTypeId;
 
     @NotBlank(message = "value name is required")
-    private String valueName;
+    private String spaceTypeName;
+
 }

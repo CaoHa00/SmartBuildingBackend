@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/value")
@@ -32,7 +33,7 @@ public class ValueController {
 
     // Get a Value by ID
     @GetMapping("/{valueId}")
-    public ResponseEntity<ValueDto> getValueById(@PathVariable Long valueId) {
+    public ResponseEntity<ValueDto> getValueById(@PathVariable UUID valueId) {
         ValueDto value = valueService.getValueById(valueId);
         return ResponseEntity.ok(value);
     }
@@ -40,7 +41,7 @@ public class ValueController {
     // Update a Value
     @PutMapping("/{valueId}")
     public ResponseEntity<ValueDto> updateValue(
-            @PathVariable Long valueId,
+            @PathVariable UUID valueId,
             @RequestBody ValueDto valueDto) {
         ValueDto updatedValue = valueService.updateValue(valueId, valueDto);
         return ResponseEntity.ok(updatedValue);
@@ -48,7 +49,7 @@ public class ValueController {
 
     // Delete a Value
     @DeleteMapping("/{valueId}")
-    public ResponseEntity<String> deleteValue(@PathVariable Long valueId) {
+    public ResponseEntity<String> deleteValue(@PathVariable UUID valueId) {
         valueService.deleteValue(valueId);
         return ResponseEntity.ok("Value deleted successfully.");
     }

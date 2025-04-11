@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.service.implementation;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class CategoryImplementation implements CategoryService  {
     }
 
     @Override
-    public CategoryDto updateCategory(CategoryDto categoryDto, Long Id) {
+    public CategoryDto updateCategory(CategoryDto categoryDto, UUID Id) {
         Category category = categoryRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Category is not found:" + Id));
         category.setCategoryName(categoryDto.getCategoryName());
@@ -36,14 +37,14 @@ public class CategoryImplementation implements CategoryService  {
     }
 
     @Override
-    public CategoryDto getCategoryById(Long Id) {
+    public CategoryDto getCategoryById(UUID Id) {
         Category category = categoryRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Category is not found:" + Id));
         return CategoryMapper.mapToCategoryDto(category);
     }
 
     @Override
-    public void deleteCategory(Long Id) {
+    public void deleteCategory(UUID Id) {
         Category category = categoryRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Category is not found:" + Id));
         categoryRepository.delete(category);

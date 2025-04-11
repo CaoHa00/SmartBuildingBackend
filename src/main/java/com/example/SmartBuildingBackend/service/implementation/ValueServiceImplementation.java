@@ -1,17 +1,15 @@
 package com.example.SmartBuildingBackend.service.implementation;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.example.SmartBuildingBackend.dto.ValueDto;
 import com.example.SmartBuildingBackend.entity.Value;
 import com.example.SmartBuildingBackend.mapper.ValueMapper;
 import com.example.SmartBuildingBackend.repository.ValueRepository;
 import com.example.SmartBuildingBackend.service.ValueService;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,7 +27,7 @@ public class ValueServiceImplementation implements ValueService {
     }
 
     @Override
-    public void deleteValue(Long valueId) {
+    public void deleteValue(UUID valueId) {
         Value value = valueRepository.findById(valueId)
                 .orElseThrow(() -> new RuntimeException("Value not found with id: " + valueId));
         valueRepository.delete(value);
@@ -44,14 +42,14 @@ public class ValueServiceImplementation implements ValueService {
     }
 
     @Override
-    public ValueDto getValueById(Long valueId) {
+    public ValueDto getValueById(UUID valueId) {
         Value value = valueRepository.findById(valueId)
                 .orElseThrow(() -> new RuntimeException("Value not found with id: " + valueId));
         return ValueMapper.mapToValueDto(value);
     }
 
     @Override
-    public ValueDto updateValue(Long valueId, ValueDto valueDto) {
+    public ValueDto updateValue(UUID valueId, ValueDto valueDto) {
         Value value = valueRepository.findById(valueId)
                 .orElseThrow(() -> new RuntimeException("Value not found with id: " + valueId));
 
@@ -62,7 +60,7 @@ public class ValueServiceImplementation implements ValueService {
     }
 
     @Override
-    public Long getValueByName(String nameValue) {
+    public UUID getValueByName(String nameValue) {
         List<Value> values = valueRepository.findAll();
         for(Value i:values){
             if(i.getValueName().equalsIgnoreCase(nameValue)){

@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +22,7 @@ public class TuyaController {
     }
 
     @PostMapping("currentValue")
-    public String getDeviceProperty(@RequestParam Long equipmentId) {
+    public String getDeviceProperty(@RequestParam UUID equipmentId) {
         return tuyaService.getDeviceProperty(equipmentId);
     }
 

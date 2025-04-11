@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.example.SmartBuildingBackend.entity.Equipment;
 
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class CategoryDto {
-    private Long categoryId;
+    private UUID categoryId;
     private String categoryName;
     private List<Equipment> equipments; 
 }

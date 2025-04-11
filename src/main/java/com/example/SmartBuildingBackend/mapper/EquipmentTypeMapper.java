@@ -13,7 +13,7 @@ public class EquipmentTypeMapper {
 
     public static EquipmentType mapToEquipmentType(EquipmentTypeDto equipmentTypeDto) {
         return new EquipmentType(
-                equipmentTypeDto.getEquipmentId(),
+                equipmentTypeDto.getEquipmentTypeId(),
                 equipmentTypeDto.getEquipmentTypeName(),
                 equipmentTypeDto.getEquipments());
     }

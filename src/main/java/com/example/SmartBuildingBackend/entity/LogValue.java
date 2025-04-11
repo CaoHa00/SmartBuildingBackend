@@ -1,10 +1,12 @@
 package com.example.SmartBuildingBackend.entity;
 
+import java.util.UUID;
+
+import org.hibernate.annotations.UuidGenerator;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -26,8 +28,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LogValue {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long logValueId;
+    @UuidGenerator
+    @Column(name = "log_value_id", updatable = false, nullable = false)
+    private UUID logValueId;
 
     @Column(name = "time_stamp")
     private long timeStamp;
