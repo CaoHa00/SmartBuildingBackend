@@ -2,11 +2,9 @@ package com.example.SmartBuildingBackend.dto;
 
 
 import java.util.List;
+import java.util.UUID;
 
-import com.example.SmartBuildingBackend.entity.Category;
-import com.example.SmartBuildingBackend.entity.EquipmentType;
 import com.example.SmartBuildingBackend.entity.LogValue;
-import com.example.SmartBuildingBackend.entity.Room;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -18,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EquipmentDto {
-    private Long equipmentId;
+    private UUID equipmentId;
 
     @NotBlank(message = "Equipment name is required")
     private String equipmentName;
@@ -27,9 +25,9 @@ public class EquipmentDto {
     private String deviceId;
 
     @NotBlank(message = "Equipment type is required")
-    private Long equipmentTypeId;
+    private UUID equipmentTypeId;
     
-    private Long roomId;
+    private UUID spaceId;
     private List<LogValue> logValues;
-    private Long categoryId;
+    private UUID categoryId;
 }

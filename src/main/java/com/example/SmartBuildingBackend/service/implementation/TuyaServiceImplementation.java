@@ -3,6 +3,7 @@ package com.example.SmartBuildingBackend.service.implementation;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -105,7 +106,7 @@ public class TuyaServiceImplementation implements TuyaService {
     }
 
     @Override
-    public String getDeviceProperty(Long equipmentId) {
+    public String getDeviceProperty(UUID equipmentId) {
         EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         String deviceId = equipmentDto.getDeviceId();
         getAccessToken();
@@ -126,22 +127,20 @@ public class TuyaServiceImplementation implements TuyaService {
     public String extractPropertiesFromResponse(String responseBody, EquipmentDto equipmentDto) {
         JSONObject valueJson = new JSONObject();
         JSONObject sendJson = new JSONObject();
-        Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto);
         double energyTotal = 0;
-        Long time = (long) 0;
+        long timestamp = 0;
+    
         try {
-
             JSONObject jsonResponse = new JSONObject(responseBody);
             JSONObject result = jsonResponse.getJSONObject("result");
             JSONArray properties = result.getJSONArray("properties");
-            time = jsonResponse.getLong("t");
-            // Extract "phase_a" (which contains raw data for voltage, current, and power)
+            timestamp = jsonResponse.getLong("t");
+    
             for (int i = 0; i < properties.length(); i++) {
                 JSONObject property = properties.getJSONObject(i);
                 String code = property.getString("code");
                 Object value = property.get("value");
-
-                // Check for the specific codes we're interested in
+    
                 if ("forward_energy_total".equals(code)) {
                     energyTotal = ((Number) value).doubleValue() / 100.0;
                     valueJson.put("total power", energyTotal);
@@ -152,34 +151,38 @@ public class TuyaServiceImplementation implements TuyaService {
                         valueJson.put("voltage", val.getDouble("voltage"));
                         valueJson.put("current", val.getDouble("current"));
                         valueJson.put("active power", val.getDouble("power"));
-                        // sent to front
+    
                         sendJson.put("voltage", val.getDouble("voltage"));
                         sendJson.put("current", val.getDouble("current"));
                         sendJson.put("active_power", val.getDouble("power"));
-                        break;
                     } else {
                         return "Invalid phase_a value format.";
                     }
                 }
             }
+    
+            UUID equipmentId = equipmentDto.getEquipmentId();
             Iterator<String> keys = valueJson.keys();
             while (keys.hasNext()) {
-                String keyName = keys.next(); // this is the key
-                Long valueId = valueService.getValueByName(keyName);
+                String key = keys.next();
+                UUID valueId = valueService.getValueByName(key); // assumes this does a lookup
                 LogValueDto logValueDto = new LogValueDto();
-                logValueDto.setTimeStamp(time);
-                logValueDto.setValueResponse(valueJson.getDouble(keyName)); // or val.get(keyName)
-                logValueService.addLogValue(equipment.getEquipmentId(), valueId, logValueDto);
+                logValueDto.setTimeStamp(timestamp);
+                logValueDto.setValueResponse(valueJson.getDouble(key));
+    
+                logValueService.addLogValue(equipmentId, valueId, logValueDto);
             }
-
-            sendJson.put("timestamp", jsonResponse.getLong("t"));
-
+    
+            sendJson.put("timestamp", timestamp);
+    
         } catch (Exception e) {
             e.printStackTrace();
             return "Error processing response: " + e.getMessage();
         }
+    
         return sendJson.toString();
     }
+    
 
     @Override
     public JSONObject parsePhaseA(String base64Value) {

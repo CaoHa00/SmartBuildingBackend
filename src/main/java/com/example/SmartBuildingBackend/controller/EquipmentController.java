@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,8 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @PostMapping
-    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam Long roomId, @RequestParam Long equipmentTypeId, @RequestParam Long categoryId , @RequestBody EquipmentDto equipmentDto) {
-        EquipmentDto newEquipment = equipmentService.addEquipment(roomId, equipmentTypeId,categoryId,equipmentDto);
+    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam UUID spaceId, @RequestParam UUID equipmentTypeId, @RequestParam UUID categoryId , @RequestBody EquipmentDto equipmentDto) {
+        EquipmentDto newEquipment = equipmentService.addEquipment(spaceId, equipmentTypeId,categoryId,equipmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEquipment);
     }
 
@@ -41,19 +42,19 @@ public class EquipmentController {
     }
     
     @GetMapping("/{equipment_id}")
-    public ResponseEntity<EquipmentDto> getEquipmentById(@PathVariable("equipment_id") Long equipmentId) {
+    public ResponseEntity<EquipmentDto> getEquipmentById(@PathVariable("equipment_id") UUID equipmentId) {
         EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         return ResponseEntity.ok(equipmentDto);
     }
 
     @PutMapping("/{equipment_id}")
-    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") Long equipmentId, @RequestBody EquipmentDto updateEquipment) {
+    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("equipment_id") UUID equipmentId, @RequestBody EquipmentDto updateEquipment) {
         EquipmentDto updatedEquipment = equipmentService.updateEquipment(equipmentId, updateEquipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedEquipment);
     }
 
     @DeleteMapping("/{equipment_id}")
-    public ResponseEntity<String> deleteEquipment(@PathVariable("equipment_id") Long equipmentId) {
+    public ResponseEntity<String> deleteEquipment(@PathVariable("equipment_id") UUID equipmentId) {
         equipmentService.deleteEquipment(equipmentId);
         return ResponseEntity.ok("Equipment deleted successfully");
     }

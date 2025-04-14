@@ -1,18 +1,20 @@
 package com.example.SmartBuildingBackend.service;
 
 import java.util.List;
+import java.util.UUID;
+
 import com.example.SmartBuildingBackend.dto.ValueDto;
 public interface ValueService {
 
     ValueDto addValue(ValueDto valueDto);
 
-    void deleteValue(Long valueId);
+    void deleteValue(UUID valueId);
 
     List<ValueDto> getAllValues();
 
-    ValueDto getValueById(Long valueId);
+    ValueDto getValueById(UUID valueId);
 
-    ValueDto updateValue(Long valueId, ValueDto valueDto);
+    ValueDto updateValue(UUID valueId, ValueDto valueDto);
 
-    Long getValueByName(String nameValue);
+    UUID getValueByName(String nameValue);
 }

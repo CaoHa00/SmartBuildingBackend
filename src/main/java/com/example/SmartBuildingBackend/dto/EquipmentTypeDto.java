@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.example.SmartBuildingBackend.entity.Equipment;
 
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class EquipmentTypeDto {
-    private Long equipmentId;
+    private UUID equipmentTypeId;
     @NotBlank(message = "Equipment type is required")
     private String equipmentTypeName;
     private List<Equipment> equipments;

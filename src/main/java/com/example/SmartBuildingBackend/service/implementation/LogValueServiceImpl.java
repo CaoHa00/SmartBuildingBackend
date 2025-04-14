@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class LogValueServiceImpl implements LogValueService {
     private final ValueRepository valueRepository;
 
     @Override
-    public LogValueDto addLogValue(Long equipmentId, Long valueId, LogValueDto logValueDto) {
+    public LogValueDto addLogValue(UUID equipmentId, UUID valueId, LogValueDto logValueDto) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
 
@@ -48,7 +49,7 @@ public class LogValueServiceImpl implements LogValueService {
     }
 
     @Override
-    public void deleteLogValue(Long logValueId) {
+    public void deleteLogValue(UUID logValueId) {
         LogValue logValue = logValueRepository.findById(logValueId)
                 .orElseThrow(() -> new RuntimeException("LogValue not found with id: " + logValueId));
         logValueRepository.delete(logValue);
@@ -63,14 +64,14 @@ public class LogValueServiceImpl implements LogValueService {
     }
 
     @Override
-    public LogValueDto getLogValueById(Long logValueId) {
+    public LogValueDto getLogValueById(UUID logValueId) {
         LogValue logValue = logValueRepository.findById(logValueId)
                 .orElseThrow(() -> new RuntimeException("LogValue not found with id: " + logValueId));
         return LogValueMapper.mapToLogValueDto(logValue);
     }
 
     @Override
-    public LogValueDto updateLogValue(Long logValueId, LogValueDto logValueDto) {
+    public LogValueDto updateLogValue(UUID logValueId, LogValueDto logValueDto) {
         LogValue logValue = logValueRepository.findById(logValueId)
                 .orElseThrow(() -> new RuntimeException("LogValue not found with id: " + logValueId));
 
@@ -81,7 +82,7 @@ public class LogValueServiceImpl implements LogValueService {
     }
 
     @Override
-    public List<LogValue> getLatestStatusList(Long equipmentId) {
+    public List<LogValue> getLatestStatusList(UUID equipmentId) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
 

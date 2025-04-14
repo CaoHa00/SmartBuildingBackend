@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public interface AqaraService {
@@ -23,12 +24,12 @@ public interface AqaraService {
 
     String refreshToken() throws Exception;
 
-    ObjectNode getJsonAPIFromServer(String response, Long equipmentId, Long value);
+    ObjectNode getJsonAPIFromServer(String response, UUID equipmentId, Long value);
 
-    String queryTemparatureAttributes(Long equipmentId) throws Exception;
+    String queryTemparatureAttributes(UUID equipmentId) throws Exception;
 
     JSONObject compareTemperature();
      
-    String queryLightControl(Long equipmentId, Long value, Long buttonPosition) throws Exception;;
+    String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception;;
 }
 

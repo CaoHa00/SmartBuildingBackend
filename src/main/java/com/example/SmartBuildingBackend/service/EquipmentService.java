@@ -1,17 +1,18 @@
 package com.example.SmartBuildingBackend.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 
 public interface EquipmentService {
     List<EquipmentDto> getAllEquipments();
 
-    EquipmentDto getEquipmentById(Long equipmentId);
+    EquipmentDto getEquipmentById(UUID equipmentId);
 
-    EquipmentDto updateEquipment(Long equipmentId, EquipmentDto updateEquipment);
+    EquipmentDto updateEquipment(UUID equipmentId, EquipmentDto updateEquipment);
 
-    void deleteEquipment(Long equipmentId);
+    void deleteEquipment(UUID equipmentId);
 
-    EquipmentDto addEquipment(Long roomId, Long equipmentTypeId,Long categoryId, EquipmentDto equipmentDto);
+    EquipmentDto addEquipment(UUID roomId, UUID equipmentTypeId,UUID categoryId, EquipmentDto equipmentDto);
 }

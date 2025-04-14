@@ -1,20 +1,21 @@
 package com.example.SmartBuildingBackend.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.example.SmartBuildingBackend.dto.LogValueDto;
 import com.example.SmartBuildingBackend.entity.LogValue;
 
 public interface LogValueService {
-    LogValueDto addLogValue(Long equipmentId, Long valueId, LogValueDto logValueDto);
+    LogValueDto addLogValue(UUID equipmentId, UUID valueId, LogValueDto logValueDto);
     
-    void deleteLogValue(Long logValueId);
+    void deleteLogValue(UUID logValueId);
 
     List<LogValueDto> getAllLogValues();
 
-    LogValueDto getLogValueById(Long logValueId);
+    LogValueDto getLogValueById(UUID logValueId);
 
-    LogValueDto updateLogValue(Long logValueId, LogValueDto logValueDto);
+    LogValueDto updateLogValue(UUID logValueId, LogValueDto logValueDto);
 
-    List<LogValue> getLatestStatusList(Long equipmentId);
+    List<LogValue> getLatestStatusList(UUID equipmentId);
 }

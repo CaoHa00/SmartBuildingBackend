@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.dto;
 
+import java.util.UUID;
+
 import com.example.SmartBuildingBackend.entity.Value;
 
 import jakarta.validation.constraints.NotBlank;
@@ -14,13 +16,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LogValueDto {
-    private Long logValueId;
+    private UUID logValueId;
 
     @NotBlank(message = "timestamp is required")
     private long timeStamp;
 
     @NotNull(message = "Equipment type is required")
-    private Long equipmentId;
+    private UUID equipmentId;
 
     @NotNull(message = "value is required")
     private Value value;

@@ -1,6 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,7 @@ public class AqaraController {
     }
 
     @PostMapping("/currentValue")
-    public ResponseEntity<String> queryAttributes(@RequestParam Long equipmentId) {
+    public ResponseEntity<String> queryAttributes(@RequestParam UUID equipmentId) {
         try {
             // get Response from Chinese server
             String response = aqaraService.queryTemparatureAttributes(equipmentId);
@@ -82,7 +83,7 @@ public class AqaraController {
     }
     
      @PostMapping("/light-control")
-    public ResponseEntity<String> controlLight(@RequestParam Long equipmentId, Long value, Long buttonPosition) throws Exception {
+    public ResponseEntity<String> controlLight(@RequestParam UUID equipmentId, Long value, Long buttonPosition) throws Exception {
         String response = aqaraService.queryLightControl(equipmentId,value,buttonPosition);
         ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId,value);
         String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);

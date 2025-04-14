@@ -117,7 +117,7 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     @Override
-    public String queryTemparatureAttributes(Long equipmentId)
+    public String queryTemparatureAttributes(UUID equipmentId)
             throws Exception {
         EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         Map<String, Object> requestBody = new HashMap<>();
@@ -148,7 +148,7 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     @Override
-    public String queryLightControl(Long equipmentId, Long value, Long buttonPosition) throws Exception {
+    public String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception {
         // Retrieve equipment details
         EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
 
@@ -212,7 +212,7 @@ public class AqaraServiceImplementation implements AqaraService {
         return sendAqaraRequest(requestBody);
     }
     @Override
-    public ObjectNode getJsonAPIFromServer(String response, Long equipmentId, Long value) {
+    public ObjectNode getJsonAPIFromServer(String response, UUID equipmentId, Long value) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode result = objectMapper.createObjectNode();
         try {
@@ -234,22 +234,21 @@ public class AqaraServiceImplementation implements AqaraService {
                         // input LogValue to store value
                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                         logValueDto.setValueResponse(node.get("value").asDouble());
-                        Long valueId = valueService.getValueByName("temperature");
+                        UUID valueId = valueService.getValueByName("temperature");
                         logValueService.addLogValue(equipmentId, valueId, logValueDto);
-    
                     }
                     if (valueNode != null && resourceId.equals("0.2.85")) {
                         result.put("humidity", valueNode.asText().substring(0, 2));
                         // input LogValue to store value
                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                         logValueDto.setValueResponse(node.get("value").asDouble());
-                        Long valueId = valueService.getValueByName("humidity");
+                        UUID valueId = valueService.getValueByName("humidity");
                         logValueService.addLogValue(equipmentId, valueId, logValueDto);
                     }
                     result.put("timeStamp", timeStamp);
                 }
                 if(node.get("errorCode")!=null){
-                    Long valueId = valueService.getValueByName("light status");
+                    UUID valueId = valueService.getValueByName("light-status");
                     logValueDto.setTimeStamp(System.currentTimeMillis());
                     logValueDto.setValueResponse((double)value);
                     logValueService.addLogValue(equipmentId, valueId, logValueDto);
