@@ -3,6 +3,7 @@ package com.example.SmartBuildingBackend.service.implementation.campusImplementa
 import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
 import com.example.SmartBuildingBackend.entity.campus.Space;
 import com.example.SmartBuildingBackend.entity.campus.SpaceType;
+import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.mapper.campus.SpaceMapper;
 import com.example.SmartBuildingBackend.repository.campus.SpaceRepository;
 import com.example.SmartBuildingBackend.repository.campus.SpaceTypeRepository;
@@ -23,12 +24,14 @@ public class SpaceServiceImplementation implements SpaceService {
     @Override
     public SpaceDto createSpace(SpaceDto dto) {
         SpaceType spaceType = spaceTypeRepository.findById(dto.getSpaceTypeId())
-                .orElseThrow(() -> new NoSuchElementException("SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
+                .orElseThrow(
+                        () -> new NoSuchElementException("SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
 
         Space parent = null;
         if (dto.getParentId() != null) {
             parent = spaceRepository.findById(dto.getParentId())
-                    .orElseThrow(() -> new NoSuchElementException("Parent Space with ID " + dto.getParentId() + " not found"));
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Parent Space with ID " + dto.getParentId() + " not found"));
         }
 
         Space space = SpaceMapper.mapToEntity(dto, spaceType, parent);
@@ -66,8 +69,12 @@ public class SpaceServiceImplementation implements SpaceService {
             dto.setSpaceTypeName(space.getSpaceType().getSpaceTypeName());
             dto.setParentId(space.getParent() != null ? space.getParent().getSpaceId() : null);
             dto.setChildren(new ArrayList<>());
-            dto.setEquipments(space.getEquipments()); // Map if needed
-
+            dto.setEquipments(
+                    space.getEquipments() != null
+                            ? space.getEquipments().stream()
+                                    .map(EquipmentMapper::mapToEquipmentDto)
+                                    .collect(Collectors.toList())
+                            : new ArrayList<>());
             dtoMap.put(dto.getSpaceId(), dto);
         }
 
@@ -101,12 +108,14 @@ public class SpaceServiceImplementation implements SpaceService {
                 .orElseThrow(() -> new NoSuchElementException("Space with ID " + id + " not found"));
 
         SpaceType spaceType = spaceTypeRepository.findById(dto.getSpaceTypeId())
-                .orElseThrow(() -> new NoSuchElementException("SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
+                .orElseThrow(
+                        () -> new NoSuchElementException("SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
 
         Space parent = null;
         if (dto.getParentId() != null) {
             parent = spaceRepository.findById(dto.getParentId())
-                    .orElseThrow(() -> new NoSuchElementException("Parent Space with ID " + dto.getParentId() + " not found"));
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Parent Space with ID " + dto.getParentId() + " not found"));
         }
 
         existing.setSpaceName(dto.getSpaceName());

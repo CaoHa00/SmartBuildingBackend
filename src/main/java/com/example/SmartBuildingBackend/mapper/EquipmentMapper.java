@@ -13,15 +13,25 @@ public class EquipmentMapper {
         if (equipment == null) {
             return null;
         }
-
         EquipmentDto dto = new EquipmentDto();
         dto.setEquipmentId(equipment.getEquipmentId());
         dto.setEquipmentName(equipment.getEquipmentName());
         dto.setDeviceId(equipment.getDeviceId());
-        dto.setEquipmentTypeId(equipment.getEquipmentType().getEquipmentTypeId());
-        dto.setSpaceId(equipment.getSpace().getSpaceId());
-        dto.setCategoryId(equipment.getCategory().getCategoryId());
-        dto.setLogValues(equipment.getLogValues());
+    
+        // Safely map equipment type
+        if (equipment.getEquipmentType() != null) {
+            dto.setEquipmentTypeId(equipment.getEquipmentType().getEquipmentTypeId());
+        }
+    
+        // Safely map space
+        if (equipment.getSpace() != null) {
+            dto.setSpaceId(equipment.getSpace().getSpaceId());
+        }
+    
+        // Safely map category
+        if (equipment.getCategory() != null) {
+            dto.setCategoryId(equipment.getCategory().getCategoryId());
+        }
 
         return dto;
     }
@@ -34,7 +44,6 @@ public class EquipmentMapper {
         equipment.setEquipmentName(dto.getEquipmentName());
         equipment.setDeviceId(dto.getDeviceId());
         equipment.setLogValues(dto.getLogValues());
-    
         equipment.setCategory(category);
         equipment.setEquipmentType(type);
         equipment.setSpace(space);

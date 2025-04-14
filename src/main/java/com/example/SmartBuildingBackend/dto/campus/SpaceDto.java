@@ -21,5 +21,5 @@ public class SpaceDto {
     private String spaceTypeName; // optional, for display
     private UUID parentId;
     private List<SpaceDto> children; // for tree view
-    private List<Equipment> equipments;
+    private List<EquipmentDto> equipments;
 }
