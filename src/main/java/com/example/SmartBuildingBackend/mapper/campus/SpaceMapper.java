@@ -26,16 +26,18 @@ public class SpaceMapper {
         dto.setSpaceTypeName(space.getSpaceType() != null ? space.getSpaceType().getSpaceTypeName() : null);
         dto.setParentId(space.getParent() != null ? space.getParent().getSpaceId() : null);
 
-
-
         // Recursively map children
         dto.setChildren(space.getChildren() != null
                 ? space.getChildren().stream()
-                    .map(child -> mapToDto(child, visited))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList())
+                        .map(child -> mapToDto(child, visited))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
                 : new ArrayList<>());
-
+        dto.setEquipments(space.getEquipments() != null
+                ? space.getEquipments().stream()
+                        .map(EquipmentMapper::mapToEquipmentDto)
+                        .collect(Collectors.toList())
+                : new ArrayList<>());
         return dto;
     }
 
