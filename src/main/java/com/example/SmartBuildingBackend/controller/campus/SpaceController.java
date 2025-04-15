@@ -1,11 +1,21 @@
 package com.example.SmartBuildingBackend.controller.campus;
+
+import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
+import com.example.SmartBuildingBackend.entity.LogValue;
+import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.campusService.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -14,7 +24,7 @@ import java.util.UUID;
 public class SpaceController {
 
     private final SpaceService spaceService;
-
+        private final LogValueService logValueService;
     @PostMapping
     public ResponseEntity<SpaceDto> createSpace(@RequestBody SpaceDto dto) {
         return ResponseEntity.ok(spaceService.createSpace(dto));
@@ -45,4 +55,28 @@ public class SpaceController {
         spaceService.deleteSpace(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{space_id}/status")
+    public ResponseEntity<List<Map<String, Object>>> getStatusBySpace(@PathVariable("space_id") UUID spaceId) {
+        SpaceDto spaceDto = spaceService.getSpaceById(spaceId);
+        List<EquipmentDto> equipmentList = spaceDto.getEquipments();
+
+        List<Map<String, Object>> statusList = new ArrayList<>();
+
+        for (EquipmentDto equipment : equipmentList) {
+            List<LogValue> latestStatuses = Optional.ofNullable(
+                logValueService.getLatestStatusList(equipment.getEquipmentId())
+            ).orElse(Collections.emptyList());
+            for (LogValue log : latestStatuses) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("valueName", log.getValue().getValueName());
+                map.put("valueResponse", log.getValueResponse());
+                map.put("equipmentName", equipment.getEquipmentName()); // optional
+                statusList.add(map);
+            }
+        }
+
+        return ResponseEntity.ok(statusList);
+    }
+
 }
