@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
@@ -30,11 +29,10 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @PostMapping
-    public ResponseEntity<EquipmentDto> addEquipment(@RequestParam UUID spaceId, @RequestParam UUID equipmentTypeId, @RequestParam UUID categoryId , @RequestBody EquipmentDto equipmentDto) {
-        EquipmentDto newEquipment = equipmentService.addEquipment(spaceId, equipmentTypeId,categoryId,equipmentDto);
+    public ResponseEntity<EquipmentDto> addEquipment(@RequestBody EquipmentDto equipmentDto) {
+        EquipmentDto newEquipment = equipmentService.addEquipment(equipmentDto.getSpaceId(), equipmentDto.getEquipmentTypeId(),equipmentDto.getCategoryId(),equipmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newEquipment);
     }
-
     @GetMapping
     public ResponseEntity<List<EquipmentDto>> getAllEquipments() {
         List<EquipmentDto> equipments = equipmentService.getAllEquipments();
