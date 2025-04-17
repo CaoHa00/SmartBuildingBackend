@@ -20,8 +20,6 @@ import org.springframework.http.MediaType;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.LogValueDto;
-import com.example.SmartBuildingBackend.entity.Equipment;
-import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.TuyaService;

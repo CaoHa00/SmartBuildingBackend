@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
+import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
@@ -30,6 +31,7 @@ import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.ValueService;
 import com.example.SmartBuildingBackend.service.WeatherService;
 import com.example.SmartBuildingBackend.utils.CreateSign;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -117,34 +119,41 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     @Override
-    public String queryTemparatureAttributes(UUID equipmentId)
+    public String queryTemparatureAttributes(List<Equipment> equipments)
             throws Exception {
-        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("intent", "query.resource.value");
-
-        // Create a single resource entry
-        Map<String, Object> resource = new HashMap<>();
-        resource.put("subjectId", equipmentDto.getDeviceId());
-
-        // Add resourceIds as a List
-        List<String> resourceIds = new ArrayList<>();
-        resourceIds.add("0.1.85");
-        resourceIds.add("0.2.85");
-        resource.put("resourceIds", resourceIds);
-
-        // Wrap resource in a List
-        List<Map<String, Object>> resources = Collections.singletonList(resource);
-
+        Map<String, Object> resource = new HashMap<>(); // Create a single resource entry
+        List<Map<String, Object>> resources = new ArrayList<>(); // Wrap resource in a List
+        for (Equipment equipment : equipments) {
+            EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipment.getEquipmentId());
+            resource.put("subjectId", equipmentDto.getDeviceId());
+            List<String> resourceIds = new ArrayList<>();// Add resourceIds as a List
+            resourceIds.add("0.1.85"); // temperature
+            resourceIds.add("0.2.85"); // humidity
+            resource.put("resourceIds", resourceIds);
+            resources.add(resource);
+        }
         // Create data object and add resources list
         Map<String, Object> data = new HashMap<>();
         data.put("resources", resources);
-
         // Add data to requestBody
         requestBody.put("data", data);
-
         // Send the request
         return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException {
+        String response = "";
+        try {
+            response = queryTemparatureAttributes(equipments);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Long value = 0L;
+        ObjectNode processedJson = processJsonAPIFromServer(response, equipments, value);
+        return new ObjectMapper().writeValueAsString(processedJson);
     }
 
     @Override
@@ -161,23 +170,23 @@ public class AqaraServiceImplementation implements AqaraService {
 
         // Create a map for the resource
         Map<String, Object> resourceMap = new HashMap<>();
-        if(buttonPosition==1){ // upperButton
+        if (buttonPosition == 1) { // upperButton
             resourceMap.put("resourceId", "4.1.85"); // Set the appropriate resource ID
-            if(value==0){
+            if (value == 0) {
                 resourceMap.put("value", "0"); // Set the desired value
             }
-            if(value==1){
+            if (value == 1) {
                 resourceMap.put("value", "1"); // Set the desired value
             }
             resourcesList.add(resourceMap);
         }
 
-        if(buttonPosition==0){ // belowButton
+        if (buttonPosition == 0) { // belowButton
             resourceMap.put("resourceId", "4.2.85"); // Set the appropriate resource ID
-            if(value==0){
+            if (value == 0) {
                 resourceMap.put("value", "0"); // Set the desired value
             }
-            if(value==1){
+            if (value == 1) {
                 resourceMap.put("value", "1"); // Set the desired value
             }
             resourcesList.add(resourceMap);
@@ -188,7 +197,7 @@ public class AqaraServiceImplementation implements AqaraService {
             resourceMap1.put("resourceId", "4.1.85");
             resourceMap1.put("value", String.valueOf(value));
             resourcesList.add(resourceMap1);
-        
+
             // bottom button
             Map<String, Object> resourceMap2 = new HashMap<>();
             resourceMap2.put("resourceId", "4.2.85");
@@ -211,22 +220,29 @@ public class AqaraServiceImplementation implements AqaraService {
         // Send the request and return the response
         return sendAqaraRequest(requestBody);
     }
+
     @Override
-    public ObjectNode getJsonAPIFromServer(String response, UUID equipmentId, Long value) {
+    public ObjectNode processJsonAPIFromServer(String response, List<Equipment> equipments, Long value) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode result = objectMapper.createObjectNode();
         try {
             JsonNode rootNode = objectMapper.readTree(response);
             ArrayNode resultArray = (ArrayNode) rootNode.get("result");
-
             LogValueDto logValueDto = new LogValueDto();
             for (JsonNode node : resultArray) {
-                if(node.get("value")!=null){
+                if (node.get("value") != null) {
                     JsonNode valueNode = node.get("value");
                     String resourceId = node.get("resourceId").asText();
                     String timeStamp = node.get("timeStamp").asText();
-    
-                    // Extract temperature value if the resourceId matches
+                    String subjectId = node.get("subjectId").asText();
+                    UUID equipmentId = null;
+                    for (Equipment equipment : equipments) {
+                        if(subjectId.equalsIgnoreCase(equipment.getDeviceId())){
+                            equipmentId=equipment.getEquipmentId();
+                        }
+                    }
+                    if(equipmentId!=null){
+                        // Extract temperature value if the resourceId matches
                     if (valueNode != null && resourceId.equals("0.1.85")) {
                         String temperature = valueNode.asText().substring(0, 2);
                         result.put("temperature", temperature);
@@ -235,7 +251,13 @@ public class AqaraServiceImplementation implements AqaraService {
                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                         logValueDto.setValueResponse(node.get("value").asDouble());
                         UUID valueId = valueService.getValueByName("temperature");
-                        logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                        boolean exists = logValueService.existsByTimestampAndValueIdAndEquipmentId(node.get("timeStamp").asLong(), valueId, equipmentId);
+                        if (!exists) {
+                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                        } else {
+                            // Optionally log or handle duplicate timestamp case
+                            System.out.println("Duplicate timestamp detected, skipping log save.");
+                        }
                     }
                     if (valueNode != null && resourceId.equals("0.2.85")) {
                         result.put("humidity", valueNode.asText().substring(0, 2));
@@ -243,23 +265,31 @@ public class AqaraServiceImplementation implements AqaraService {
                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                         logValueDto.setValueResponse(node.get("value").asDouble());
                         UUID valueId = valueService.getValueByName("humidity");
-                        logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                        boolean exists = logValueService.existsByTimestampAndValueIdAndEquipmentId(
+                                node.get("timeStamp").asLong(), valueId, equipmentId);
+                        if (!exists) {
+                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                        } else {
+                            // Optionally log or handle duplicate timestamp case
+                            System.out.println("Duplicate timestamp detected, skipping log save.");
+                        }
                     }
                     result.put("timeStamp", timeStamp);
+                    }
                 }
-                if(node.get("errorCode")!=null){
+                if (node.get("errorCode") != null) {
                     UUID valueId = valueService.getValueByName("light-status");
                     logValueDto.setTimeStamp(System.currentTimeMillis());
-                    logValueDto.setValueResponse((double)value);
-                    logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                    logValueDto.setValueResponse((double) value);
+                    logValueService.addLogValue(equipments.get(0).getEquipmentId(), valueId, logValueDto);
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException("Error processing JSON response", e);
         }
-
         return result;
     }
+
     @Override
     public String convertToJson(Map<String, Object> request) {
         try {
@@ -417,7 +447,6 @@ public class AqaraServiceImplementation implements AqaraService {
     }
 
     // method to process API response from CHINA
-  
 
     public JSONObject compareTemperature() {
         JSONObject json = new JSONObject();

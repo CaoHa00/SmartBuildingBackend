@@ -1,6 +1,5 @@
 package com.example.SmartBuildingBackend.mapper.campus;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
 import com.example.SmartBuildingBackend.entity.campus.Space;
 import com.example.SmartBuildingBackend.entity.campus.SpaceType;
