@@ -14,7 +14,7 @@ public interface EquipmentService {
 
     void deleteEquipment(UUID equipmentId);
 
-    EquipmentDto addEquipment(UUID roomId, UUID equipmentTypeId,UUID categoryId, EquipmentDto equipmentDto);
+    EquipmentDto addEquipment(UUID spaceId, UUID equipmentTypeId,UUID categoryId, EquipmentDto equipmentDto);
 
     
 }
