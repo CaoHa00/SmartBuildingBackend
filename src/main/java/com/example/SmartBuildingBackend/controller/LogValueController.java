@@ -18,13 +18,12 @@ public class LogValueController {
     private final LogValueService logValueService;
 
     // Add a new LogValue
-    @PostMapping
-    public ResponseEntity<LogValueDto> addLogValue(@RequestParam UUID equipmentId, @RequestParam UUID valueId,
-            @RequestBody LogValueDto logValueDto) {
-        LogValueDto savedLogValue = logValueService.addLogValue(equipmentId, valueId, logValueDto);
-
-        return ResponseEntity.ok(savedLogValue);
-    }
+    // @PostMapping
+    // public ResponseEntity<LogValueDto> addLogValue(
+    //         @RequestBody LogValueDto logValueDto) {
+    //     LogValueDto savedLogValue = logValueService.addLogValue(logValueDto.getEquipmentId(), logValueDto.getValue().getValueId(), logValueDto);
+    //     return ResponseEntity.ok(savedLogValue);
+    // }
 
     // Get all LogValues
     @GetMapping
