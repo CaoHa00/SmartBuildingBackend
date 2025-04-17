@@ -106,4 +106,10 @@ public class LogValueServiceImpl implements LogValueService {
         return new ArrayList<>(latestByValueName.values());
     }
 
+    @Override
+    public boolean existsByTimestampAndValueIdAndEquipmentId(Long timeStamp, UUID valueId, UUID equipmentId) {
+        return logValueRepository.existsByTimeStampAndValue_ValueIdAndEquipment_EquipmentId(timeStamp, valueId,
+                equipmentId);
+    }
+
 }

@@ -3,8 +3,11 @@ package com.example.SmartBuildingBackend.service;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import com.example.SmartBuildingBackend.entity.Equipment;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,12 +27,16 @@ public interface AqaraService {
 
     String refreshToken() throws Exception;
 
-    ObjectNode getJsonAPIFromServer(String response, UUID equipmentId, Long value);
+    ObjectNode processJsonAPIFromServer(String response,List<Equipment> equipments, Long value);
 
-    String queryTemparatureAttributes(UUID equipmentId) throws Exception;
+    String queryTemparatureAttributes(List<Equipment> equipments) throws Exception;
 
     JSONObject compareTemperature();
      
-    String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception;;
+    String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception;
+
+     public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException;
+  
+    
 }
 

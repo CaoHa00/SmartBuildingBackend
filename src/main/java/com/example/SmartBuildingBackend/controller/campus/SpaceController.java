@@ -72,10 +72,10 @@ public class SpaceController {
                 map.put("valueName", log.getValue().getValueName());
                 map.put("valueResponse", log.getValueResponse());
                 map.put("equipmentName", equipment.getEquipmentName()); // optional
+                map.put("equipmentId", equipment.getEquipmentId());
                 statusList.add(map);
             }
         }
-
         return ResponseEntity.ok(statusList);
     }
 

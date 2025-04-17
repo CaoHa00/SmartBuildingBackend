@@ -1,5 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
+import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.mapper.AqaraConfigMapper;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
-
+import com.example.SmartBuildingBackend.repository.EquipmentRepository;
 import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.service.EquipmentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +32,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/aqara")
 public class AqaraController {
     private final AqaraService aqaraService;
+    private final EquipmentRepository equipmentRepository;
     private AqaraConfigRepository aqaraConfigRepository;
 
     @PostMapping("/query-device-info")
@@ -67,29 +72,34 @@ public class AqaraController {
         }
     }
 
-    @PostMapping("/currentValue")
-    public ResponseEntity<String> queryAttributes(@RequestParam UUID equipmentId) {
-        try {
-            // get Response from Chinese server
-            String response = aqaraService.queryTemparatureAttributes(equipmentId);
-            Long value = (long) 0;
-            // directly get the processed JSON response
-            ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId,value);
-            String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
-            return ResponseEntity.ok(updatedResponse);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
-        }
-    }
-    
-     @PostMapping("/light-control")
-    public ResponseEntity<String> controlLight(@RequestParam UUID equipmentId, Long value, Long buttonPosition) throws Exception {
-        String response = aqaraService.queryLightControl(equipmentId,value,buttonPosition);
-        ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response, equipmentId,value);
+    // @PostMapping("/currentValue")
+    // public ResponseEntity<String> queryAttributes(@RequestParam UUID equipmentId)
+    // {
+    // try {
+    // // get Response from Chinese server
+    // String response = aqaraService.queryTemparatureAttributes(equipmentId);
+    // Long value = (long) 0;
+    // // directly get the processed JSON response
+    // ObjectNode processedJson = aqaraService.getJsonAPIFromServer(response,
+    // equipmentId,value);
+    // String updatedResponse = new
+    // ObjectMapper().writeValueAsString(processedJson);
+    // return ResponseEntity.ok(updatedResponse);
+    // } catch (Exception e) {
+    // return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+    // }
+    // }
+
+    @PostMapping("/light-control")
+    public ResponseEntity<String> controlLight(@RequestParam Long value,@RequestParam Long buttonPosition, @RequestBody UUID equipmentId)
+            throws Exception {
+        String response = aqaraService.queryLightControl(equipmentId, value, buttonPosition);
+        Equipment equipment = equipmentRepository.findById(equipmentId).orElseThrow();
+        List<Equipment> equipmentList = Collections.singletonList(equipment);
+        ObjectNode processedJson = aqaraService.processJsonAPIFromServer(response, equipmentList, value);
         String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
         return ResponseEntity.ok(updatedResponse);
     }
-
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
         try {

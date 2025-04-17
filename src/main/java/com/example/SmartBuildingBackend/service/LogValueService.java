@@ -18,4 +18,7 @@ public interface LogValueService {
     LogValueDto updateLogValue(UUID logValueId, LogValueDto logValueDto);
 
     List<LogValue> getLatestStatusList(UUID equipmentId);
+    
+    boolean existsByTimestampAndValueIdAndEquipmentId(Long timeStamp, UUID valueId, UUID equipmentId);
+
 }
