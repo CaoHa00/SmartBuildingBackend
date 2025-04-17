@@ -21,7 +21,7 @@ public class AqaraScheduler {
         this.equipmentRepository = equipmentRepository;
     }
 
-    @Scheduled(fixedRateString = "${aqara.sync.interval:60000}")
+    @Scheduled(fixedRateString = "${aqara.sync.interval:1800000}")
     public void autoQueryTemperature() {
         List<Equipment> equipments = equipmentRepository.findByCategory_CategoryName("sensor");
         try {
