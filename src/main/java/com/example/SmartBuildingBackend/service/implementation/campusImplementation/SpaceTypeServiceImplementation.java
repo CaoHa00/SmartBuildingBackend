@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,14 +26,56 @@ public class SpaceTypeServiceImplementation implements SpaceTypeService {
 
     @Override
     public SpaceTypeDto addSpaceType(SpaceTypeDto spaceTypeDto) {
+        long finalLevel = spaceTypeDto.getSpaceLevel();
+
+        if (spaceTypeDto.getSpaceLevel() == 0) {
+            // We need to adjust levels for the new `SpaceType`
+            // Get all existing SpaceTypes, order by their level
+            List<SpaceType> allSpaceTypes = spaceTypeRepository.findAllByOrderBySpaceLevelAsc();
+
+            // If there are existing types, we shift the levels
+            if (!allSpaceTypes.isEmpty()) {
+                // Update levels of all space types that are at or above the new level
+                for (SpaceType existingSpaceType : allSpaceTypes) {
+                    if (existingSpaceType.getSpaceLevel() >= 1) {
+                        existingSpaceType.setSpaceLevel(existingSpaceType.getSpaceLevel() + 1);
+                        spaceTypeRepository.save(existingSpaceType);
+                    }
+                }
+            }
+
+            // Set the new space type to level 1
+            finalLevel = 1;
+            spaceTypeDto.setSpaceLevel(finalLevel);
+        }
+
+        // Now map the DTO to entity and save it
         SpaceType spaceType = SpaceTypeMapper.mapToEntity(spaceTypeDto);
         SpaceType saved = spaceTypeRepository.save(spaceType);
+
         return SpaceTypeMapper.mapToDto(saved);
     }
 
     @Override
     public void deleteSpaceType(UUID spaceTypeId) {
+        // Step 1: Find the SpaceType before deletion to get its level
+        SpaceType spaceTypeToDelete = spaceTypeRepository.findById(spaceTypeId)
+                .orElseThrow(() -> new NoSuchElementException("SpaceType with ID " + spaceTypeId + " not found"));
+
+        long deletedSpaceLevel = spaceTypeToDelete.getSpaceLevel();
+
+        // Step 2: Delete the SpaceType
         spaceTypeRepository.deleteById(spaceTypeId);
+
+        // Step 3: Update the levels of affected SpaceTypes
+        List<SpaceType> affectedSpaceTypes = spaceTypeRepository
+                .findAllBySpaceLevelGreaterThanOrderBySpaceLevelAsc(deletedSpaceLevel);
+
+        long newLevel = deletedSpaceLevel; // Start renumbering from the level of the deleted SpaceType
+        for (SpaceType spaceType : affectedSpaceTypes) {
+            spaceType.setSpaceLevel(newLevel++);
+            spaceTypeRepository.save(spaceType);
+        }
     }
 
     @Override

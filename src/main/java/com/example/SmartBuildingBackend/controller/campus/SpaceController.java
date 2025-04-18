@@ -3,18 +3,24 @@ package com.example.SmartBuildingBackend.controller.campus;
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
 import com.example.SmartBuildingBackend.entity.LogValue;
+import com.example.SmartBuildingBackend.entity.campus.Space;
+import com.example.SmartBuildingBackend.mapper.campus.SpaceMapper;
 import com.example.SmartBuildingBackend.service.LogValueService;
 import com.example.SmartBuildingBackend.service.campusService.*;
 
 import lombok.RequiredArgsConstructor;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,10 +30,25 @@ import java.util.UUID;
 public class SpaceController {
 
     private final SpaceService spaceService;
-        private final LogValueService logValueService;
+    private final LogValueService logValueService;
+
     @PostMapping
-    public ResponseEntity<SpaceDto> createSpace(@RequestBody SpaceDto dto) {
-        return ResponseEntity.ok(spaceService.createSpace(dto));
+    public ResponseEntity<?> createSpace(@RequestBody SpaceDto dto) {
+        try {
+            SpaceDto created = spaceService.createSpace(dto);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Space created successfully",
+                    "data", created));
+        } catch (BadRequestException e) {
+            return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
@@ -65,8 +86,7 @@ public class SpaceController {
 
         for (EquipmentDto equipment : equipmentList) {
             List<LogValue> latestStatuses = Optional.ofNullable(
-                logValueService.getLatestStatusList(equipment.getEquipmentId())
-            ).orElse(Collections.emptyList());
+                    logValueService.getLatestStatusList(equipment.getEquipmentId())).orElse(Collections.emptyList());
             for (LogValue log : latestStatuses) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("valueName", log.getValue().getValueName());

@@ -9,6 +9,8 @@ import com.example.SmartBuildingBackend.repository.campus.SpaceRepository;
 import com.example.SmartBuildingBackend.repository.campus.SpaceTypeRepository;
 import com.example.SmartBuildingBackend.service.campusService.SpaceService;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,21 +24,25 @@ public class SpaceServiceImplementation implements SpaceService {
     private final SpaceTypeRepository spaceTypeRepository;
 
     @Override
-    public SpaceDto createSpace(SpaceDto dto) {
+    public SpaceDto createSpace(SpaceDto dto) throws BadRequestException {
         SpaceType spaceType = spaceTypeRepository.findById(dto.getSpaceTypeId())
-                .orElseThrow(
-                        () -> new NoSuchElementException("SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "SpaceType with ID " + dto.getSpaceTypeId() + " not found"));
 
         Space parent = null;
         if (dto.getParentId() != null) {
             parent = spaceRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new NoSuchElementException(
                             "Parent Space with ID " + dto.getParentId() + " not found"));
+
+            if (spaceType.getSpaceLevel() <= parent.getSpaceType().getSpaceLevel()) {
+                throw new BadRequestException(
+                        "Invalid hierarchy: Child space type must be at a lower level than its parent");
+            }
         }
 
         Space space = SpaceMapper.mapToEntity(dto, spaceType, parent);
         Space saved = spaceRepository.save(space);
-
         return SpaceMapper.mapToDto(saved, new HashSet<>());
     }
 
