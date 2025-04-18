@@ -1,5 +1,9 @@
 package com.example.SmartBuildingBackend.dto.campus;
+import java.util.List;
 import java.util.UUID;
+
+import com.example.SmartBuildingBackend.entity.campus.Space;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -16,4 +20,8 @@ public class SpaceTypeDto {
     @NotBlank(message = "value name is required")
     private String spaceTypeName;
 
+    private Long spaceLevel;
+    
+    @JsonIgnore 
+    private List<Space> spaces;
 }

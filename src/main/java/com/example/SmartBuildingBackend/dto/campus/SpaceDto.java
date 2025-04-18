@@ -1,11 +1,8 @@
 package com.example.SmartBuildingBackend.dto.campus;
-
-
 import java.util.List;
 import java.util.UUID;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
-import com.example.SmartBuildingBackend.entity.Equipment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
