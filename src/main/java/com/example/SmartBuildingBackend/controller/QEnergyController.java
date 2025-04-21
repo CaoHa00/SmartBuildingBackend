@@ -1,11 +1,14 @@
 package com.example.SmartBuildingBackend.controller;
 
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.SmartBuildingBackend.dto.QenergyDto;
 import com.example.SmartBuildingBackend.service.QEnergyService;
 
 import lombok.AllArgsConstructor;
@@ -34,5 +37,10 @@ public class QEnergyController {
         } catch (Exception e) {
             return Map.of("error", e.getMessage());
         }
+    }
+    @GetMapping("/daily_consumption")
+    public ResponseEntity<List<QenergyDto>> getDailyConsumption() throws Exception {
+        List<QenergyDto> dailyConsumption = qEnergyService.getAllQenergy();
+        return ResponseEntity.ok(dailyConsumption);
     }
 }
