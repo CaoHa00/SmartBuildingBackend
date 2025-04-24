@@ -1,8 +1,9 @@
-package com.example.SmartBuildingBackend.controller.campus;
+package com.example.SmartBuildingBackend.controller.space;
 
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceTypeDto;
-import com.example.SmartBuildingBackend.service.campusService.SpaceTypeService;
+import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
+import com.example.SmartBuildingBackend.service.space.SpaceTypeService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,13 @@ public class SpaceTypeController {
     @GetMapping("/{id}")
     public ResponseEntity<SpaceTypeDto> getSpaceTypeById(@PathVariable UUID id) {
         return ResponseEntity.ok(spaceTypeService.getSpaceTypeById(id));
+    }
+
+    @GetMapping("/level/{level}")
+    public ResponseEntity<SpaceTypeDto> getSpaceTypeByLevel(@PathVariable long level) {
+        return spaceTypeService.getSpaceTypeByLevel(level)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")

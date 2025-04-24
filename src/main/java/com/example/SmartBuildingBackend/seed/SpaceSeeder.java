@@ -1,10 +1,10 @@
 // //This function is to create B8
 // package com.example.SmartBuildingBackend.seed;
 
-// import com.example.SmartBuildingBackend.entity.campus.Space;
-// import com.example.SmartBuildingBackend.entity.campus.SpaceType;
-// import com.example.SmartBuildingBackend.repository.campus.SpaceRepository;
-// import com.example.SmartBuildingBackend.repository.campus.SpaceTypeRepository;
+// import com.example.SmartBuildingBackend.entity.space.Space;
+// import com.example.SmartBuildingBackend.entity.space.SpaceType;
+// import com.example.SmartBuildingBackend.repository.space.SpaceRepository;
+// import com.example.SmartBuildingBackend.repository.space.SpaceTypeRepository;
 // import org.springframework.boot.CommandLineRunner;
 // import org.springframework.stereotype.Component;
 

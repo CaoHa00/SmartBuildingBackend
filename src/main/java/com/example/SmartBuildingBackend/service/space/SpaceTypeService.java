@@ -1,9 +1,11 @@
-package com.example.SmartBuildingBackend.service.campusService;
+package com.example.SmartBuildingBackend.service.space;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceTypeDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
 
 public interface SpaceTypeService {
 
@@ -18,4 +20,6 @@ public interface SpaceTypeService {
     SpaceTypeDto updateSpaceType(UUID spaceTypeId, SpaceTypeDto spaceTypeDto);
 
     UUID getIdByName(String spaceTypeName);
+
+    Optional<SpaceTypeDto> getSpaceTypeByLevel(long level);
 }

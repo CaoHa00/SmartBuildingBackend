@@ -1,12 +1,14 @@
-package com.example.SmartBuildingBackend.controller.campus;
+package com.example.SmartBuildingBackend.controller.space;
 
 import com.example.SmartBuildingBackend.dto.EquipmentDto;
-import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
 import com.example.SmartBuildingBackend.entity.LogValue;
-import com.example.SmartBuildingBackend.entity.campus.Space;
-import com.example.SmartBuildingBackend.mapper.campus.SpaceMapper;
+import com.example.SmartBuildingBackend.entity.space.Space;
+import com.example.SmartBuildingBackend.mapper.space.SpaceMapper;
 import com.example.SmartBuildingBackend.service.LogValueService;
-import com.example.SmartBuildingBackend.service.campusService.*;
+import com.example.SmartBuildingBackend.service.TuyaService;
+import com.example.SmartBuildingBackend.service.space.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,11 +33,12 @@ public class SpaceController {
 
     private final SpaceService spaceService;
     private final LogValueService logValueService;
-
+    private final TuyaService   tuyaService;
     @PostMapping
     public ResponseEntity<?> createSpace(@RequestBody SpaceDto dto) {
         try {
             SpaceDto created = spaceService.createSpace(dto);
+          //  tuyaService.createTuyaSpace(created.getSpaceName(), created.getSpaceId());
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Space created successfully",

@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.example.SmartBuildingBackend.entity.campus.Space;
+import com.example.SmartBuildingBackend.entity.space.Space;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

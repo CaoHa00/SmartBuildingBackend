@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.entity.campus;
+package com.example.SmartBuildingBackend.entity.space;
 
 import jakarta.persistence.*;
 import lombok.*;

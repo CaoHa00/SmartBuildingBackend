@@ -4,7 +4,7 @@ import com.example.SmartBuildingBackend.dto.EquipmentDto;
 import com.example.SmartBuildingBackend.entity.Category;
 import com.example.SmartBuildingBackend.entity.Equipment;
 import com.example.SmartBuildingBackend.entity.EquipmentType;
-import com.example.SmartBuildingBackend.entity.campus.Space;
+import com.example.SmartBuildingBackend.entity.space.Space;
 
 
 public class EquipmentMapper {
@@ -32,13 +32,11 @@ public class EquipmentMapper {
         if (equipment.getCategory() != null) {
             dto.setCategoryId(equipment.getCategory().getCategoryId());
         }
-
         return dto;
     }
 
     public static Equipment mapToEquipment(EquipmentDto dto, Category category, EquipmentType type, Space space) {
         if (dto == null) return null;
-    
         Equipment equipment = new Equipment();
         equipment.setEquipmentId(dto.getEquipmentId());
         equipment.setEquipmentName(dto.getEquipmentName());
@@ -47,7 +45,6 @@ public class EquipmentMapper {
         equipment.setCategory(category);
         equipment.setEquipmentType(type);
         equipment.setSpace(space);
-    
         return equipment;
     }
     

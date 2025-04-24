@@ -1,11 +1,8 @@
-package com.example.SmartBuildingBackend.mapper.campus;
+package com.example.SmartBuildingBackend.mapper.space;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceTypeDto;
-import com.example.SmartBuildingBackend.entity.campus.Space;
-import com.example.SmartBuildingBackend.entity.campus.SpaceType;
+import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
+import com.example.SmartBuildingBackend.entity.space.SpaceType;
 
 public class SpaceTypeMapper {
 

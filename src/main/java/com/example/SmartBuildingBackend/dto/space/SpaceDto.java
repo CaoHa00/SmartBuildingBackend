@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.dto.campus;
+package com.example.SmartBuildingBackend.dto.space;
 import java.util.List;
 import java.util.UUID;
 

@@ -1,13 +1,11 @@
-package com.example.SmartBuildingBackend.entity.campus;
+package com.example.SmartBuildingBackend.entity.space;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,4 +32,5 @@ public class SpaceType {
     @OneToMany(mappedBy = "spaceType", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Space> spaces = new ArrayList<>();
+    
 }

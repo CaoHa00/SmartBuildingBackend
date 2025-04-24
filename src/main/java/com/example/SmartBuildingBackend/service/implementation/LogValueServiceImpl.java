@@ -43,9 +43,16 @@ public class LogValueServiceImpl implements LogValueService {
         LogValue logValue = LogValueMapper.mapToLogValue(logValueDto);
         logValue.setEquipment(equipment);
         logValue.setValue(value);
-
-        LogValue savedLogValue = logValueRepository.save(logValue);
-        return LogValueMapper.mapToLogValueDto(savedLogValue);
+        boolean exists = logValueRepository.existsByValue_ValueIdAndEquipment_EquipmentId(
+                valueId, equipmentId);
+        if (!exists) {
+            LogValue savedLogValue = logValueRepository.save(logValue);
+            return LogValueMapper.mapToLogValueDto(savedLogValue);
+        }
+        else {
+            System.out.println("Value is the same, so it won't be added");
+            return logValueDto; // or some indication of "skipped"
+        }
     }
 
     @Override
@@ -102,14 +109,7 @@ public class LogValueServiceImpl implements LogValueService {
                 latestByValueName.put(valueName, log); // keep the newest one
             }
         }
-
         return new ArrayList<>(latestByValueName.values());
-    }
-
-    @Override
-    public boolean existsByTimestampAndValueIdAndEquipmentId(Long timeStamp, UUID valueId, UUID equipmentId) {
-        return logValueRepository.existsByTimeStampAndValue_ValueIdAndEquipment_EquipmentId(timeStamp, valueId,
-                equipmentId);
     }
 
 }

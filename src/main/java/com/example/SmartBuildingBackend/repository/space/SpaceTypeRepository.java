@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.repository.campus;
+package com.example.SmartBuildingBackend.repository.space;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,11 +6,12 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.SmartBuildingBackend.entity.campus.SpaceType;
+import com.example.SmartBuildingBackend.entity.space.SpaceType;
 
 
 public interface SpaceTypeRepository extends JpaRepository<SpaceType, UUID> {
     Optional<SpaceType> findBySpaceTypeName(String spaceTypeName);
     List<SpaceType> findAllByOrderBySpaceLevelAsc();
     List<SpaceType> findAllBySpaceLevelGreaterThanOrderBySpaceLevelAsc(long level);
+    Optional<SpaceType> findAllBySpaceLevel (long level);
 }

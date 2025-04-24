@@ -1,16 +1,18 @@
-package com.example.SmartBuildingBackend.service.implementation.campusImplementation;
+package com.example.SmartBuildingBackend.service.implementation.space;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceTypeDto;
-import com.example.SmartBuildingBackend.entity.campus.SpaceType;
-import com.example.SmartBuildingBackend.mapper.campus.SpaceTypeMapper;
-import com.example.SmartBuildingBackend.repository.campus.SpaceTypeRepository;
-import com.example.SmartBuildingBackend.service.campusService.SpaceTypeService;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
+import com.example.SmartBuildingBackend.entity.space.SpaceType;
+import com.example.SmartBuildingBackend.mapper.space.SpaceTypeMapper;
+import com.example.SmartBuildingBackend.repository.space.SpaceTypeRepository;
+import com.example.SmartBuildingBackend.service.space.SpaceTypeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -107,5 +109,10 @@ public class SpaceTypeServiceImplementation implements SpaceTypeService {
         SpaceType spaceType = spaceTypeRepository.findBySpaceTypeName(spaceTypeName)
                 .orElseThrow(() -> new RuntimeException("SpaceType not found with name: " + spaceTypeName));
         return spaceType.getSpaceTypeId();
+    }
+
+    public Optional<SpaceTypeDto> getSpaceTypeByLevel(long level) {
+        return spaceTypeRepository.findAllBySpaceLevel(level)
+            .map(SpaceTypeMapper::mapToDto);
     }
 }
