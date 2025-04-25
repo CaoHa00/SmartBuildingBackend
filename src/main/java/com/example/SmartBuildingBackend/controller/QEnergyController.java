@@ -30,14 +30,6 @@ public class QEnergyController {
             return Map.of("error", e.getMessage());
         }
     }
-    @GetMapping("/cost_consumption_summary")
-    public Map<String,Object> getSiteDataConsupmption() {
-        try {
-           return qEnergyService.fetchCostConsumptionSummary();
-        } catch (Exception e) {
-            return Map.of("error", e.getMessage());
-        }
-    }
     @GetMapping("/daily_consumption")
     public ResponseEntity<List<QenergyDto>> getDailyConsumption() throws Exception {
         List<QenergyDto> dailyConsumption = qEnergyService.getAllQenergy();
