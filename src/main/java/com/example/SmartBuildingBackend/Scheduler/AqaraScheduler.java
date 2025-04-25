@@ -1,14 +1,13 @@
 package com.example.SmartBuildingBackend.Scheduler;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.example.SmartBuildingBackend.entity.Equipment;
-import com.example.SmartBuildingBackend.repository.EquipmentRepository;
-import com.example.SmartBuildingBackend.service.AqaraService;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
+import com.example.SmartBuildingBackend.service.provider.aqara.AqaraService;
 
 @Component
 public class AqaraScheduler {

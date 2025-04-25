@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.example.SmartBuildingBackend.entity.Equipment;
-import com.example.SmartBuildingBackend.repository.EquipmentRepository;
-import com.example.SmartBuildingBackend.service.TuyaService;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
+import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 
 @Component
 public class TuyaScheduler {
@@ -21,10 +21,11 @@ public class TuyaScheduler {
     }
     @Scheduled(fixedRateString = "${tuya.sync.interval}")
     public void autoQueryTuyaTemperature() {
-        List<Equipment> equipments = equipmentRepository.findByCategory_CategoryNameAndEquipmentType_EquipmentTypeName("sensor","Tuya");
+        List<Equipment> equipments = equipmentRepository.findByEquipmentType_EquipmentTypeName("Tuya");
         try {
+            @SuppressWarnings("unused") // for debugger log
             String result = tuyaService.getLatestStatusDeviceList(equipments);
-            System.out.println("Synced data for equipment : " + result);
+          //  System.out.println("Synced data for equipment : " + result); log for debugging
         } catch (Exception e) {
             System.err.println("Failed to sync equipment : " + e.getMessage());
         }

@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
-import com.example.SmartBuildingBackend.entity.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.mapper.AqaraConfigMapper;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
-import com.example.SmartBuildingBackend.repository.EquipmentRepository;
-import com.example.SmartBuildingBackend.service.AqaraService;
-import com.example.SmartBuildingBackend.service.EquipmentService;
+import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
+import com.example.SmartBuildingBackend.service.provider.aqara.AqaraService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

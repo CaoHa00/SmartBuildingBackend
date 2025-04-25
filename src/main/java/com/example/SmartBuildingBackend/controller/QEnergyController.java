@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.SmartBuildingBackend.service.QEnergyService;
+import com.example.SmartBuildingBackend.service.provider.QEnergy.QEnergyService;
 
 import lombok.AllArgsConstructor;
 

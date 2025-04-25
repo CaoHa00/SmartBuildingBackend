@@ -3,7 +3,7 @@ package com.example.SmartBuildingBackend.mapper.space;
 import com.example.SmartBuildingBackend.dto.space.SpaceDto;
 import com.example.SmartBuildingBackend.entity.space.Space;
 import com.example.SmartBuildingBackend.entity.space.SpaceType;
-import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
+import com.example.SmartBuildingBackend.mapper.equipment.EquipmentMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;

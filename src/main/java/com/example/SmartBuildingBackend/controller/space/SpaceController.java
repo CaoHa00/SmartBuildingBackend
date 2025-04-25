@@ -1,14 +1,13 @@
 package com.example.SmartBuildingBackend.controller.space;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.space.SpaceDto;
-import com.example.SmartBuildingBackend.dto.space.SpaceTypeDto;
-import com.example.SmartBuildingBackend.entity.LogValue;
-import com.example.SmartBuildingBackend.entity.space.Space;
-import com.example.SmartBuildingBackend.mapper.space.SpaceMapper;
-import com.example.SmartBuildingBackend.service.LogValueService;
-import com.example.SmartBuildingBackend.service.TuyaService;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.LogValue;
+import com.example.SmartBuildingBackend.service.equipment.LogValueService;
+import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 import com.example.SmartBuildingBackend.service.space.*;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -32,8 +30,8 @@ import java.util.UUID;
 public class SpaceController {
 
     private final SpaceService spaceService;
+    private final TuyaService tuyaService;
     private final LogValueService logValueService;
-    private final TuyaService   tuyaService;
     @PostMapping
     public ResponseEntity<?> createSpace(@RequestBody SpaceDto dto) {
         try {
@@ -57,6 +55,13 @@ public class SpaceController {
     @GetMapping("/{id}")
     public ResponseEntity<SpaceDto> getSpace(@PathVariable UUID id) {
         return ResponseEntity.ok(spaceService.getSpaceById(id));
+    }
+
+     @PostMapping("/{id}/light-control")
+    public ResponseEntity<String> controlLight(@RequestParam int value,@PathVariable UUID id)
+            throws Exception {
+        String response = tuyaService.controlLight(id, value);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

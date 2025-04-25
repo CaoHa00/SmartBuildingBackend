@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.SmartBuildingBackend.dto.EquipmentTypeDto;
-import com.example.SmartBuildingBackend.service.EquipementTypeService;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentTypeDto;
+import com.example.SmartBuildingBackend.service.equipment.EquipmentTypeService;
 
 import lombok.AllArgsConstructor;
 
@@ -23,7 +23,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping("api/equipmentType")
 public class EquipementTypeController {
-    public final EquipementTypeService equipementTypeService;
+    public final EquipmentTypeService equipementTypeService;
 
     @GetMapping
     public ResponseEntity<List<EquipmentTypeDto>> getAllEquipentType() {

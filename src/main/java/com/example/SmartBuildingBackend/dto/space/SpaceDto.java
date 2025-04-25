@@ -2,7 +2,7 @@ package com.example.SmartBuildingBackend.dto.space;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
