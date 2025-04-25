@@ -1,4 +1,4 @@
-// //This function is to create B8
+// //This function is to create a block
 // package com.example.SmartBuildingBackend.seed;
 
 // import com.example.SmartBuildingBackend.entity.space.Space;

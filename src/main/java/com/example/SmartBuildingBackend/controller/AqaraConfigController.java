@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SmartBuildingBackend.dto.AqaraConfigDto;
-import com.example.SmartBuildingBackend.service.AqaraConfigService;
+import com.example.SmartBuildingBackend.service.provider.aqara.AqaraConfigService;
 
 import lombok.AllArgsConstructor;
 

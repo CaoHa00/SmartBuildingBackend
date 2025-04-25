@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.SmartBuildingBackend.dto.EquipmentDto;
-import com.example.SmartBuildingBackend.service.EquipmentService;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
+import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
 
 import lombok.AllArgsConstructor;
 

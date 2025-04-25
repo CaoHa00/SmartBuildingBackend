@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.SmartBuildingBackend.service.TuyaService;
+import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 
 @RestController
 @RequestMapping("/api/tuya/")

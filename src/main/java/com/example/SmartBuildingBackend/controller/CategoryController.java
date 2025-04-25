@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.SmartBuildingBackend.dto.CategoryDto;
-import com.example.SmartBuildingBackend.service.CategoryService;
+import com.example.SmartBuildingBackend.dto.equipment.CategoryDto;
+import com.example.SmartBuildingBackend.service.equipment.CategoryService;
 
 import lombok.AllArgsConstructor;
 

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 
-import com.example.SmartBuildingBackend.entity.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

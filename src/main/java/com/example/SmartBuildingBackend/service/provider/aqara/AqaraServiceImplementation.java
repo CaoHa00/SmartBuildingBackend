@@ -1,0 +1,447 @@
+package com.example.SmartBuildingBackend.service.provider.aqara;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.SmartBuildingBackend.entity.AqaraConfig;
+import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
+import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
+import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
+import com.example.SmartBuildingBackend.service.equipment.LogValueService;
+import com.example.SmartBuildingBackend.service.equipment.ValueService;
+import com.example.SmartBuildingBackend.service.weather.WeatherService;
+import com.example.SmartBuildingBackend.utils.CreateSign;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.ListMessagesResponse;
+import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.MessagePart;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import lombok.AllArgsConstructor;
+
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+@Service
+@AllArgsConstructor
+public class AqaraServiceImplementation implements AqaraService {
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private final AqaraConfigRepository aqaraConfigRepository;
+    private final Gmail gmailService;
+
+    private LogValueService logValueService;
+    private final ValueService valueService;
+    private static int DEFAULT_TEMPERATURE = 0;
+    private final WeatherService weatherService;
+    private EquipmentService equipmentService;
+
+    @Override
+    public String sendRequestToAqara(Map<String, Object> requestBody) throws Exception {
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public String queryDetailsAttributes(Map<String, Object> requestBody, String model, String resourceId)
+            throws Exception {
+        requestBody.put("intent", "query.resource.info");
+        Map<String, Object> data = new HashMap<>();
+        data.put("model", model);
+
+        if (resourceId != null) {
+            data.put("resourceId", resourceId);
+        }
+
+        requestBody.put("data", data);
+
+        // Send the request
+        return sendAqaraRequest(requestBody);
+    }
+
+    private String sendAqaraRequest(Map<String, Object> requestBody) throws Exception {
+        AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc() // Get the latest config
+                .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
+
+        String nonce = UUID.randomUUID().toString().replace("-", "");
+        String time = String.valueOf(System.currentTimeMillis());
+        // Generate Sign
+        String sign = CreateSign.createSign(
+                aqaraConfig.getAccessToken(),
+                aqaraConfig.getAppId(),
+                aqaraConfig.getKeyId(),
+                nonce, time,
+                aqaraConfig.getAppKey());
+        // Create Headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Accesstoken", aqaraConfig.getAccessToken().trim());
+        headers.set("Appid", aqaraConfig.getAppId().trim());
+        headers.set("Keyid", aqaraConfig.getKeyId().trim());
+        headers.set("Nonce", nonce.trim());
+        headers.set("Time", time.trim());
+        headers.set("Sign", sign);
+        headers.set("Lang", "en");
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        // Send Request
+        ResponseEntity<String> response = restTemplate.exchange(aqaraConfig.getUrl(), HttpMethod.POST, entity,
+                String.class);
+        return response.getBody();
+    }
+
+    @Override
+    public String queryTemparatureAttributes(List<Equipment> equipments)
+            throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "query.resource.value");
+        Map<String, Object> resource = new HashMap<>(); // Create a single resource entry
+        List<Map<String, Object>> resources = new ArrayList<>(); // Wrap resource in a List
+        for (Equipment equipment : equipments) {
+            EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipment.getEquipmentId());
+            resource.put("subjectId", equipmentDto.getDeviceId());
+            List<String> resourceIds = new ArrayList<>();// Add resourceIds as a List
+            resourceIds.add("0.1.85"); // temperature
+            resourceIds.add("0.2.85"); // humidity
+            resource.put("resourceIds", resourceIds);
+            resources.add(resource);
+        }
+        // Create data object and add resources list
+        Map<String, Object> data = new HashMap<>();
+        data.put("resources", resources);
+        // Add data to requestBody
+        requestBody.put("data", data);
+        // Send the request
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException {
+        String response = "";
+        try {
+            response = queryTemparatureAttributes(equipments);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Long value = 0L;
+        ObjectNode processedJson = processJsonAPIFromServer(response, equipments, value);
+        return new ObjectMapper().writeValueAsString(processedJson);
+    }
+
+    @Override
+    public String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception {
+        // Retrieve equipment details
+        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
+
+        // Initialize the request body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "write.resource.device");
+
+        // Create a list to hold resource maps
+        List<Map<String, Object>> resourcesList = new ArrayList<>();
+
+        // Create a map for the resource
+        Map<String, Object> resourceMap = new HashMap<>();
+        if (buttonPosition == 1) { // upperButton
+            resourceMap.put("resourceId", "4.1.85"); // Set the appropriate resource ID
+            if (value == 0) {
+                resourceMap.put("value", "0"); // Set the desired value
+            }
+            if (value == 1) {
+                resourceMap.put("value", "1"); // Set the desired value
+            }
+            resourcesList.add(resourceMap);
+        }
+
+        if (buttonPosition == 0) { // belowButton
+            resourceMap.put("resourceId", "4.2.85"); // Set the appropriate resource ID
+            if (value == 0) {
+                resourceMap.put("value", "0"); // Set the desired value
+            }
+            if (value == 1) {
+                resourceMap.put("value", "1"); // Set the desired value
+            }
+            resourcesList.add(resourceMap);
+        }
+        if (buttonPosition == 2) {
+            // top button
+            Map<String, Object> resourceMap1 = new HashMap<>();
+            resourceMap1.put("resourceId", "4.1.85");
+            resourceMap1.put("value", String.valueOf(value));
+            resourcesList.add(resourceMap1);
+
+            // bottom button
+            Map<String, Object> resourceMap2 = new HashMap<>();
+            resourceMap2.put("resourceId", "4.2.85");
+            resourceMap2.put("value", String.valueOf(value));
+            resourcesList.add(resourceMap2);
+        }
+
+        // Create the data object with subjectId and resources
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("subjectId", equipmentDto.getDeviceId()); // Set the device ID
+        dataMap.put("resources", resourcesList);
+
+        // Wrap the data object in a list as required by the API
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        dataList.add(dataMap);
+
+        // Add the data list to the request body
+        requestBody.put("data", dataList);
+
+        // Send the request and return the response
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public ObjectNode processJsonAPIFromServer(String response, List<Equipment> equipments, Long value) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode result = objectMapper.createObjectNode();
+        try {
+            JsonNode rootNode = objectMapper.readTree(response);
+            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
+            LogValueDto logValueDto = new LogValueDto();
+            for (JsonNode node : resultArray) {
+                if (node.get("value") != null) {
+                    JsonNode valueNode = node.get("value");
+                    String resourceId = node.get("resourceId").asText();
+                    String timeStamp = node.get("timeStamp").asText();
+                    String subjectId = node.get("subjectId").asText();
+                    UUID equipmentId = null;
+                    for (Equipment equipment : equipments) {
+                        if (subjectId.equalsIgnoreCase(equipment.getDeviceId())) {
+                            equipmentId = equipment.getEquipmentId();
+                        }
+                    }
+                    if (equipmentId != null) {
+                        // Extract temperature value if the resourceId matches
+                        if (valueNode != null && resourceId.equals("0.1.85")) {
+                            String temperature = valueNode.asText().substring(0, 2);
+                            result.put("temperature", temperature);
+                            DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
+                            // input LogValue to store value
+                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                            logValueDto.setValueResponse(node.get("value").asDouble());
+                            UUID valueId = valueService.getValueByName("temperature");
+                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                        }
+                        if (valueNode != null && resourceId.equals("0.2.85")) {
+                            result.put("humidity", valueNode.asText().substring(0, 2));
+                            // input LogValue to store value
+                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                            logValueDto.setValueResponse(node.get("value").asDouble());
+                            UUID valueId = valueService.getValueByName("humidity");
+                         
+                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+    
+                        }
+                        result.put("timeStamp", timeStamp);
+                    }
+                }
+                if (node.get("errorCode") != null) {
+                    UUID valueId = valueService.getValueByName("light-status");
+                    logValueDto.setTimeStamp(System.currentTimeMillis());
+                    logValueDto.setValueResponse((double) value);
+                    logValueService.addLogValue(equipments.get(0).getEquipmentId(), valueId, logValueDto);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing JSON response", e);
+        }
+        return result;
+    }
+
+    @Override
+    public String convertToJson(Map<String, Object> request) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
+        } catch (Exception e) {
+            return "Error converting to JSON: " + e.getMessage();
+        }
+    }
+
+    @Override
+    public String authorizationVerificationCode() throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "config.auth.getAuthCode");
+        Map<String, Object> data = new HashMap<>();
+        data.put("account", "cao.ha@eiu.edu.vn");
+        data.put("accountType", 0);
+        data.put("accessTokenValidity", "1y");
+        requestBody.put("data", data);
+        return sendAqaraRequest(requestBody);
+    }
+
+    /**
+     * Fetches the latest email from Aqara and extracts the verification code.
+     * Lấy email mới nhất từ Aqara và trích xuất mã xác minh.
+     * 
+     * @return The verification code if found, otherwise null.
+     */
+    public String getVerificationCode() {
+        try {
+            ListMessagesResponse response = gmailService.users().messages()
+                    .list("cao.ha@eiu.edu.vn")
+                    .setQ("from:uc-system@sessystem.aqara.com")
+                    .setMaxResults(1L)
+                    .execute();
+
+            List<Message> messages = response.getMessages();
+            if (messages == null || messages.isEmpty()) {
+                System.out.println("No emails found from Aqara.");
+                return null;
+            }
+
+            for (Message msg : messages) {
+                Message fullMessage = gmailService.users().messages()
+                        .get("cao.ha@eiu.edu.vn", msg.getId()).setFormat("full").execute();
+
+                String emailBody = extractEmailBody(fullMessage.getPayload());
+                if (emailBody != null && !emailBody.isEmpty()) {
+                    System.out.println("\n--- Extracted Email Body ---\n" + emailBody);
+
+                    // Extract verification code (6-digit number)
+                    Pattern pattern = Pattern.compile("\\b\\d{6}\\b");
+                    Matcher matcher = pattern.matcher(emailBody);
+
+                    if (matcher.find()) {
+                        System.out.println("Found Verification Code: " + matcher.group());
+                        return matcher.group();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error fetching emails: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Lấy nội dung email từ phần tin nhắn.
+     * 
+     * @param payload
+     * @return
+     */
+    private String extractEmailBody(MessagePart payload) {
+        StringBuilder emailBody = new StringBuilder();
+
+        if (payload.getParts() != null) {
+            for (MessagePart part : payload.getParts()) {
+                String mimeType = part.getMimeType();
+                if ("text/plain".equalsIgnoreCase(mimeType) || "text/html".equalsIgnoreCase(mimeType)) {
+                    String content = decodeBase64(part.getBody().getData());
+                    if ("text/html".equalsIgnoreCase(mimeType)) {
+                        content = htmlToText(content); // Convert HTML to readable text
+                    }
+                    emailBody.append(content).append("\n");
+                } else if (part.getParts() != null) {
+                    emailBody.append(extractEmailBody(part));
+                }
+            }
+        } else {
+            emailBody.append(decodeBase64(payload.getBody().getData()));
+        }
+
+        return emailBody.toString().trim();
+    }
+
+    /**
+     * Chuyển đổi nội dung HTML thành văn bản đọc được.
+     * 
+     * @param htmlContent
+     * @return
+     */
+    private String htmlToText(String htmlContent) {
+        Document doc = Jsoup.parse(htmlContent);
+        return doc.text(); // Extract visible text
+    }
+
+    /**
+     * Giải mã chuỗi Base64.
+     * 
+     * @param encodedText
+     * @return
+     */
+    private String decodeBase64(String encodedText) {
+        if (encodedText == null)
+            return "";
+        byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedText);
+        return new String(decodedBytes, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public String createVirtualAccount() throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "config.auth.createAccount");
+        Map<String, Object> data = new HashMap<>();
+        data.put("accountId", "752620960511351175824423735297");
+        requestBody.put("data", data);
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public String ObtainAccessToken() throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "config.auth.getToken");
+        String code = getVerificationCode();
+        System.out.println("code: " + code);
+        Map<String, Object> data = new HashMap<>();
+        data.put("authCode", code);
+        data.put("account", "cao.ha@eiu.edu.vn");
+        requestBody.put("data", data);
+        return sendAqaraRequest(requestBody);
+    }
+
+    @Override
+    public String refreshToken() throws Exception {
+        AqaraConfig aqaraConfig = aqaraConfigRepository.findFirstByOrderByAqaraConfigIdDesc() // Get the latest config
+                .orElseThrow(() -> new RuntimeException("No Aqara configuration found in the database"));
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("intent", "config.auth.refreshToken");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("refreshToken", aqaraConfig.getRefreshToken());
+        requestBody.put("data", data);
+        return sendAqaraRequest(requestBody);
+    }
+
+    // method to process API response from CHINA
+
+    public JSONObject compareTemperature() {
+        JSONObject json = new JSONObject();
+        String message = "";
+        int temperature = weatherService.getWeatherOutSide();
+        if (temperature > DEFAULT_TEMPERATURE) {
+            message = "Hello";
+        }
+        json.put("message", message);
+        return json;
+    }
+
+}

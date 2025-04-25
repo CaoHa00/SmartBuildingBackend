@@ -1,7 +1,7 @@
 package com.example.SmartBuildingBackend.controller;
 
-import com.example.SmartBuildingBackend.dto.LogValueDto;
-import com.example.SmartBuildingBackend.service.LogValueService;
+import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
+import com.example.SmartBuildingBackend.service.equipment.LogValueService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
