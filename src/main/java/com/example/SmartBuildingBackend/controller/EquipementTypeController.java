@@ -44,8 +44,8 @@ public class EquipementTypeController {
     }
 
     @PutMapping("/{equipmentType_id}")
-    public ResponseEntity<EquipmentTypeDto> updateEquipmentType(@PathVariable("equipmentType_id") UUID Id) {
-        equipementTypeService.deleteEquipementType(Id);
+    public ResponseEntity<EquipmentTypeDto> updateEquipmentType(@PathVariable("equipmentType_id") UUID Id, @RequestBody EquipmentTypeDto equipmentTypeDto) {
+        equipementTypeService.updateEquipmentTypeDto(equipmentTypeDto,Id);
         return ResponseEntity.ok().build();
     }
 

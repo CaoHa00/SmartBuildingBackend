@@ -12,5 +12,7 @@ import com.example.SmartBuildingBackend.entity.Equipment;
 @Repository
 public interface EquipmentRepository extends JpaRepository<Equipment, UUID> {
     List<Equipment> findByCategory_CategoryName(String categoryName);
-
+    List<Equipment> findByEquipmentType_EquipmentTypeName(String equipmentTypeName);
+    Equipment findByDeviceId(String deviceId);
+    List<Equipment> findByCategory_CategoryNameAndEquipmentType_EquipmentTypeName(String categoryName, String equipmentTypeName);
 }

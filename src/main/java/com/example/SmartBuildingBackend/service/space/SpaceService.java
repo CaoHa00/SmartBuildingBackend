@@ -1,11 +1,11 @@
-package com.example.SmartBuildingBackend.service.campusService;
+package com.example.SmartBuildingBackend.service.space;
 
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.coyote.BadRequestException;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
 
 
 public interface SpaceService {

@@ -1,8 +1,8 @@
-package com.example.SmartBuildingBackend.mapper.campus;
+package com.example.SmartBuildingBackend.mapper.space;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
-import com.example.SmartBuildingBackend.entity.campus.Space;
-import com.example.SmartBuildingBackend.entity.campus.SpaceType;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.entity.space.Space;
+import com.example.SmartBuildingBackend.entity.space.SpaceType;
 import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
 
 import java.util.*;
@@ -15,9 +15,7 @@ public class SpaceMapper {
         if (space == null || visited.contains(space.getSpaceId())) {
             return null;
         }
-
         visited.add(space.getSpaceId());
-
         SpaceDto dto = new SpaceDto();
         dto.setSpaceId(space.getSpaceId());
         dto.setSpaceName(space.getSpaceName());

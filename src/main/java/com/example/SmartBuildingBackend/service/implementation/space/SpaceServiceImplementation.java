@@ -1,13 +1,14 @@
-package com.example.SmartBuildingBackend.service.implementation.campusImplementation;
+package com.example.SmartBuildingBackend.service.implementation.space;
 
-import com.example.SmartBuildingBackend.dto.campus.SpaceDto;
-import com.example.SmartBuildingBackend.entity.campus.Space;
-import com.example.SmartBuildingBackend.entity.campus.SpaceType;
+import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.entity.space.Space;
+import com.example.SmartBuildingBackend.entity.space.SpaceType;
 import com.example.SmartBuildingBackend.mapper.EquipmentMapper;
-import com.example.SmartBuildingBackend.mapper.campus.SpaceMapper;
-import com.example.SmartBuildingBackend.repository.campus.SpaceRepository;
-import com.example.SmartBuildingBackend.repository.campus.SpaceTypeRepository;
-import com.example.SmartBuildingBackend.service.campusService.SpaceService;
+import com.example.SmartBuildingBackend.mapper.space.SpaceMapper;
+import com.example.SmartBuildingBackend.repository.space.SpaceRepository;
+import com.example.SmartBuildingBackend.repository.space.SpaceTypeRepository;
+import com.example.SmartBuildingBackend.service.space.SpaceService;
+
 import lombok.RequiredArgsConstructor;
 
 import org.apache.coyote.BadRequestException;
@@ -83,7 +84,6 @@ public class SpaceServiceImplementation implements SpaceService {
                             : new ArrayList<>());
             dtoMap.put(dto.getSpaceId(), dto);
         }
-
         for (SpaceDto dto : dtoMap.values()) {
             UUID parentId = dto.getParentId();
             if (parentId != null && dtoMap.containsKey(parentId)) {
@@ -92,10 +92,8 @@ public class SpaceServiceImplementation implements SpaceService {
                 roots.add(dto);
             }
         }
-
         roots.sort(Comparator.comparing(SpaceDto::getSpaceName));
         sortChildrenRecursively(roots);
-
         return roots;
     }
 
@@ -139,4 +137,5 @@ public class SpaceServiceImplementation implements SpaceService {
         }
         spaceRepository.deleteById(id);
     }
+
 }

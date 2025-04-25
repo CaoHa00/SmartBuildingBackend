@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,44 +236,33 @@ public class AqaraServiceImplementation implements AqaraService {
                     String subjectId = node.get("subjectId").asText();
                     UUID equipmentId = null;
                     for (Equipment equipment : equipments) {
-                        if(subjectId.equalsIgnoreCase(equipment.getDeviceId())){
-                            equipmentId=equipment.getEquipmentId();
+                        if (subjectId.equalsIgnoreCase(equipment.getDeviceId())) {
+                            equipmentId = equipment.getEquipmentId();
                         }
                     }
-                    if(equipmentId!=null){
+                    if (equipmentId != null) {
                         // Extract temperature value if the resourceId matches
-                    if (valueNode != null && resourceId.equals("0.1.85")) {
-                        String temperature = valueNode.asText().substring(0, 2);
-                        result.put("temperature", temperature);
-                        DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
-                        // input LogValue to store value
-                        logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                        logValueDto.setValueResponse(node.get("value").asDouble());
-                        UUID valueId = valueService.getValueByName("temperature");
-                        boolean exists = logValueService.existsByTimestampAndValueIdAndEquipmentId(node.get("timeStamp").asLong(), valueId, equipmentId);
-                        if (!exists) {
+                        if (valueNode != null && resourceId.equals("0.1.85")) {
+                            String temperature = valueNode.asText().substring(0, 2);
+                            result.put("temperature", temperature);
+                            DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
+                            // input LogValue to store value
+                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                            logValueDto.setValueResponse(node.get("value").asDouble());
+                            UUID valueId = valueService.getValueByName("temperature");
                             logValueService.addLogValue(equipmentId, valueId, logValueDto);
-                        } else {
-                            // Optionally log or handle duplicate timestamp case
-                            System.out.println("Duplicate timestamp detected, skipping log save.");
                         }
-                    }
-                    if (valueNode != null && resourceId.equals("0.2.85")) {
-                        result.put("humidity", valueNode.asText().substring(0, 2));
-                        // input LogValue to store value
-                        logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                        logValueDto.setValueResponse(node.get("value").asDouble());
-                        UUID valueId = valueService.getValueByName("humidity");
-                        boolean exists = logValueService.existsByTimestampAndValueIdAndEquipmentId(
-                                node.get("timeStamp").asLong(), valueId, equipmentId);
-                        if (!exists) {
+                        if (valueNode != null && resourceId.equals("0.2.85")) {
+                            result.put("humidity", valueNode.asText().substring(0, 2));
+                            // input LogValue to store value
+                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+                            logValueDto.setValueResponse(node.get("value").asDouble());
+                            UUID valueId = valueService.getValueByName("humidity");
+                         
                             logValueService.addLogValue(equipmentId, valueId, logValueDto);
-                        } else {
-                            // Optionally log or handle duplicate timestamp case
-                            System.out.println("Duplicate timestamp detected, skipping log save.");
+    
                         }
-                    }
-                    result.put("timeStamp", timeStamp);
+                        result.put("timeStamp", timeStamp);
                     }
                 }
                 if (node.get("errorCode") != null) {
