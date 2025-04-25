@@ -173,7 +173,6 @@ public class TuyaServiceImplementation implements TuyaService {
             throw new RuntimeException("Failed to convert to JSON", e);
         }
     }
-
     @Override
     public String createTuyaGroup(String spaceTuyaPlatformId, String groupName) {
         String url = "/v2.1/cloud/thing/group";
@@ -187,7 +186,6 @@ public class TuyaServiceImplementation implements TuyaService {
         ResponseEntity<String> response = getResponse(url, "POST", jsonBody);
         return response.getBody();
     }
-
     @Override
     public String getLatestStatusDeviceList(List<Equipment> equipments) {
         String baseUrl = "/v1.0/iot-03/devices/status";
