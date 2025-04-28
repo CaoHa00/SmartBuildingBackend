@@ -42,9 +42,13 @@ public class LogValueServiceImpl implements LogValueService {
         LogValue logValue = LogValueMapper.mapToLogValue(logValueDto);
         logValue.setEquipment(equipment);
         logValue.setValue(value);
+        
+        // check if db store the same value
         boolean exists = logValueRepository.existsByValueResponseAndValue_ValueIdAndEquipment_EquipmentId(logValueDto.getValueResponse(),
                 valueId, equipmentId);
+        
         if (!exists) {
+     
             LogValue savedLogValue = logValueRepository.save(logValue);
             return LogValueMapper.mapToLogValueDto(savedLogValue);
         }

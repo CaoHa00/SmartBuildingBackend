@@ -2,7 +2,6 @@ package com.example.SmartBuildingBackend.controller.space;
 
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.space.SpaceDto;
-import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
 import com.example.SmartBuildingBackend.service.equipment.LogValueService;
 import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
@@ -84,7 +83,6 @@ public class SpaceController {
         spaceService.deleteSpace(id);
         return ResponseEntity.noContent().build();
     }
-
     @GetMapping("/{space_id}/status")
     public ResponseEntity<List<Map<String, Object>>> getStatusBySpace(@PathVariable("space_id") UUID spaceId) {
         SpaceDto spaceDto = spaceService.getSpaceById(spaceId);
@@ -106,5 +104,4 @@ public class SpaceController {
         }
         return ResponseEntity.ok(statusList);
     }
-
 }
