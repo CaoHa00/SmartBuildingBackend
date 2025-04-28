@@ -41,6 +41,8 @@ import com.example.SmartBuildingBackend.service.space.SpaceTuyaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
 
 import jakarta.annotation.PostConstruct;
@@ -132,20 +134,29 @@ public class TuyaServiceImplementation implements TuyaService {
     }
 
     @Override
-    public String getDeviceProperty(UUID equipmentId) {
-        EquipmentDto equipmentDto = equipmentService.getEquipmentById(equipmentId);
-        String deviceId = equipmentDto.getDeviceId();
-        String method = "GET";
-        String body = "";
-        String url = "/v2.0/cloud/thing/" + deviceId + "/shadow/properties"; // API Path
-
-        ResponseEntity<String> response = getResponse(url, method, body);
-        String responseBody = response.getBody();
-        // electric
-        if (response.getStatusCode() == HttpStatus.OK && responseBody != null) {
-            return extractPropertiesFromResponse(responseBody, equipmentDto);
+    public String getDeviceProperty(List<Equipment> equipments) {
+        String result = "";
+        if (equipments.size()==0) {
+            result = "No elevator found";
+            return result;
         }
-        return responseBody;
+        
+        for (Equipment equipment : equipments) {
+            String deviceId = equipment.getDeviceId();
+            String method = "GET";
+            String body = "";
+            String url = "/v2.0/cloud/thing/" + deviceId + "/shadow/properties"; // API Path
+            ResponseEntity<String> response = getResponse(url, method, body);
+           
+            String responseBody =  processJsonAPIFromServer(response, equipment); // current elevator of b8 is 1
+            System.out.println(responseBody);
+        }
+        // electric
+        // if (response.getStatusCode() == HttpStatus.OK && responseBody != null) {
+        //     return extractPropertiesFromResponse(responseBody, equipmentDto);
+        // }
+        result = "Elevator Logs Added Success";
+        return result;
     }
 
     @Override // Not use
@@ -187,6 +198,7 @@ public class TuyaServiceImplementation implements TuyaService {
         ResponseEntity<String> response = getResponse(url, "POST", jsonBody);
         return response.getBody();
     }
+   
 
     @Override
     public String controlLight(UUID spaceId, int valueLight) {
@@ -228,9 +240,90 @@ public class TuyaServiceImplementation implements TuyaService {
                 }
             }
         }
-
         return result.toString();
     }
+
+    //Read and Store to database // Test only for Elevator
+    public String processJsonAPIFromServer(ResponseEntity<String> response, Equipment equipment) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode root = mapper.readTree(response.getBody());
+            if (root.path("success").asBoolean()) {
+                JsonNode properties = root.path("result").path("properties");
+    
+                double voltageA = -1;
+                double voltageB = -1;
+                double voltageC = -1;
+    
+                for (JsonNode status : properties) {
+                    String code = status.path("code").asText();
+                    JsonNode valueNode = status.path("value");
+    
+                    UUID valueId;
+    
+                    switch (code) {
+                        case "VoltageA": {
+                            voltageA = valueNode.asInt() / 10.0;
+                            break;
+                        }
+                        case "VoltageB": {
+                            voltageB = valueNode.asInt() / 10.0;
+                            break;
+                        }
+                        case "VoltageC": {
+                            voltageC = valueNode.asInt() / 10.0;
+                            break;
+                        }
+                        case "TotalEnergyConsumed": {
+                            valueId = valueService.getValueByName("total-energy-consumed");
+                            double totalEnergy = valueNode.asInt() / 10.0;
+                            saveLog(equipment, valueId, totalEnergy);
+                            break;
+                        }
+                        case "Current": {
+                            valueId = valueService.getValueByName("electric-current");
+                            double current = valueNode.asInt();
+                            saveLog(equipment, valueId, current);
+                            break;
+                        }
+                        case "ActivePower": {
+                            valueId = valueService.getValueByName("active-power");
+                            double activePower = valueNode.asDouble();
+                            saveLog(equipment, valueId, activePower);
+                            break;
+                        }
+                        case "Temperature": {
+                            valueId = valueService.getValueByName("temperature");
+                            double temperature = valueNode.asDouble() / 10.0;
+                            saveLog(equipment, valueId, temperature);
+                            break;
+                        }
+                        default:
+                            System.out.println("Unhandled code: " + code);
+                    }
+                }
+    
+                // After processing all properties, calculate and save average voltage
+                if (voltageA != -1 && voltageB != -1 && voltageC != -1) {
+                    UUID valueId = valueService.getValueByName("voltage");
+                    double voltageAverage = (voltageA + voltageB + voltageC) / 3.0;
+                    saveLog(equipment, valueId, voltageAverage);
+                } else {
+                    System.out.println("Missing voltage data for phases. VoltageA: " + voltageA + ", VoltageB: " + voltageB + ", VoltageC: " + voltageC);
+                }
+    
+                System.out.println("Processed device ID: " + equipment.getDeviceId());
+    
+            } else {
+                System.out.println("Tuya API response indicates failure.");
+            }
+        } catch (JsonProcessingException e) {
+            System.err.println("Failed to parse Tuya response JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return response.getBody();
+    }
+    
 
     @Override // not clean yet
     public String getLatestStatusDeviceList(List<Equipment> equipments) {

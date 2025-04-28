@@ -47,6 +47,7 @@ public class EquipmentServiceImplementation implements EquipmentService {
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
 
         Equipment equipment = EquipmentMapper.mapToEquipment(equipmentDto, category, equipmentType, space);
+
         Equipment savedEquipment = equipmentRepository.save(equipment);
         return EquipmentMapper.mapToEquipmentDto(savedEquipment);
     }
@@ -56,10 +57,15 @@ public class EquipmentServiceImplementation implements EquipmentService {
     public EquipmentDto updateEquipment(UUID equipmentId, EquipmentDto updateEquipment) {
         Equipment equipment = equipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
-
+        Space space = spaceRepository.findById(updateEquipment.getSpaceId())
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + updateEquipment.getSpaceId()));
+                Category category = categoryRepository.findById(updateEquipment.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + updateEquipment.getCategoryId()));
         equipment.setEquipmentName(updateEquipment.getEquipmentName());
         equipment.setDeviceId(updateEquipment.getDeviceId());
-
+        equipment.setCategory(category);
+        
+        equipment.setSpace(space);
         Equipment updated = equipmentRepository.save(equipment);
         return EquipmentMapper.mapToEquipmentDto(updated);
     }

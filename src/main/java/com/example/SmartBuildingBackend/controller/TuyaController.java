@@ -21,10 +21,10 @@ public class TuyaController {
         this.tuyaService = tuyaService;
     }
 
-    @PostMapping("currentValue")
-    public String getDeviceProperty(@RequestParam UUID equipmentId) {
-        return tuyaService.getDeviceProperty(equipmentId);
-    }
+    // @PostMapping("currentValue")
+    // public String getDeviceProperty(@RequestParam UUID equipmentId) {
+    //     return tuyaService.getDeviceProperty(equipmentId);
+    // }
 
     @GetMapping("/devices")
     public String getDevicesProperty() {

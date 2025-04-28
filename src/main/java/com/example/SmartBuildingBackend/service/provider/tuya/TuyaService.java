@@ -13,7 +13,7 @@ import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 public interface TuyaService {
     String getAccessToken(String url, String method, String body);
 
-    String getDeviceProperty(UUID equipmentId);
+    String getDeviceProperty(List<Equipment> equipments);
 
     String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
 
@@ -34,4 +34,6 @@ public interface TuyaService {
     String getLatestStatusDeviceList(List<Equipment> equipments);
 
     String controlLight(UUID spaceId, int valueLight);
+
+    
 }
