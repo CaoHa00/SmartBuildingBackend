@@ -14,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
-import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.mapper.equipment.LogValueMapper;
 import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
 import com.example.SmartBuildingBackend.repository.equipment.LogValueRepository;
-import com.example.SmartBuildingBackend.repository.equipment.ValueRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,33 +27,12 @@ public class LogValueServiceImpl implements LogValueService {
 
     private final LogValueRepository logValueRepository;
     private final EquipmentRepository equipmentRepository;
-    private final ValueRepository valueRepository;
 
     @Override
-    public LogValueDto addLogValue(UUID equipmentId, UUID valueId, LogValueDto logValueDto) {
-        Equipment equipment = equipmentRepository.findById(equipmentId)
-                .orElseThrow(() -> new RuntimeException("Equipment not found with id: " + equipmentId));
-
-        Value value = valueRepository.findById(valueId)
-                .orElseThrow(() -> new RuntimeException("Value not found with id: " + valueId));
-
+    public LogValueDto addLogValue(LogValueDto logValueDto) { // only be added from Equipment State
         LogValue logValue = LogValueMapper.mapToLogValue(logValueDto);
-        logValue.setEquipment(equipment);
-        logValue.setValue(value);
-        
-        // check if db store the same value
-        boolean exists = logValueRepository.existsByValueResponseAndValue_ValueIdAndEquipment_EquipmentId(logValueDto.getValueResponse(),
-                valueId, equipmentId);
-        
-        if (!exists) {
-     
-            LogValue savedLogValue = logValueRepository.save(logValue);
-            return LogValueMapper.mapToLogValueDto(savedLogValue);
-        }
-        else {
-            System.out.println("Value is the same, so it won't be added");
-            return logValueDto; // or some indication of "skipped"
-        }
+        LogValue savedLogValue = logValueRepository.save(logValue);
+         return LogValueMapper.mapToLogValueDto(savedLogValue);
     }
 
     @Override

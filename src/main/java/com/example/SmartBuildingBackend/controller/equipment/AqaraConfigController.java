@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.controller;
+package com.example.SmartBuildingBackend.controller.equipment;
 
 import java.util.List;
 

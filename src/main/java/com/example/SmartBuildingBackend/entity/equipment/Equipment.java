@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.entity.equipment;
+                                                                                                                                                           package com.example.SmartBuildingBackend.entity.equipment;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,8 +54,14 @@ public class Equipment {
     @JsonManagedReference(value = "equipment")
     private List<LogValue> logValues;
 
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "equipmentState")
+    private List<EquipmentState> equipmentStates;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     @JsonBackReference(value = "category-ref")
     private Category category;
+
+    
 }

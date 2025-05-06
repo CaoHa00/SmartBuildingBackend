@@ -17,7 +17,7 @@ public class EquipmentMapper {
         dto.setEquipmentId(equipment.getEquipmentId());
         dto.setEquipmentName(equipment.getEquipmentName());
         dto.setDeviceId(equipment.getDeviceId());
-    
+        dto.setEquipmentStates(equipment.getEquipmentStates());
         // Safely map equipment type
         if (equipment.getEquipmentType() != null) {
             dto.setEquipmentTypeId(equipment.getEquipmentType().getEquipmentTypeId());
@@ -45,6 +45,7 @@ public class EquipmentMapper {
         equipment.setCategory(category);
         equipment.setEquipmentType(type);
         equipment.setSpace(space);
+        equipment.setEquipmentStates(dto.getEquipmentStates());
         return equipment;
     }
     

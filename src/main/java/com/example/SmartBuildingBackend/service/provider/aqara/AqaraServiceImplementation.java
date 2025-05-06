@@ -19,7 +19,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
+import com.example.SmartBuildingBackend.repository.equipment.ValueRepository;
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
@@ -60,6 +62,7 @@ public class AqaraServiceImplementation implements AqaraService {
     private static int DEFAULT_TEMPERATURE = 0;
     private final WeatherService weatherService;
     private EquipmentService equipmentService;
+    private final ValueRepository valueRepository;
 
     @Override
     public String sendRequestToAqara(Map<String, Object> requestBody) throws Exception {
@@ -246,27 +249,35 @@ public class AqaraServiceImplementation implements AqaraService {
                             // input LogValue to store value
                             logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                             logValueDto.setValueResponse(node.get("value").asDouble());
-                            UUID valueId = valueService.getValueByName("temperature");
-                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                            Value valueInDB = valueService.getValueByName("temperature");
+                            UUID valueId = valueInDB.getValueId();
+                            logValueDto.setEquipmentId(equipmentId);
+                            logValueDto.setValueId(valueId);
+                            logValueService.addLogValue(logValueDto);
                         }
                         if (valueNode != null && resourceId.equals("0.2.85")) {
                             result.put("humidity", valueNode.asText().substring(0, 2));
                             // input LogValue to store value
                             logValueDto.setTimeStamp(node.get("timeStamp").asLong());
                             logValueDto.setValueResponse(node.get("value").asDouble());
-                            UUID valueId = valueService.getValueByName("humidity");
-                         
-                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+                            Value valueInDB =  valueService.getValueByName("humidity");
+                            UUID valueId = valueInDB.getValueId();
+                            logValueDto.setEquipmentId(equipmentId);
+                            logValueDto.setValueId(valueId);
+                            logValueService.addLogValue(logValueDto);
     
                         }
                         result.put("timeStamp", timeStamp);
                     }
                 }
                 if (node.get("errorCode") != null) {
-                    UUID valueId = valueService.getValueByName("light-status");
+                    Value valueInDB =  valueService.getValueByName("light-status");
+                    UUID valueId =  valueInDB.getValueId();
                     logValueDto.setTimeStamp(System.currentTimeMillis());
                     logValueDto.setValueResponse((double) value);
-                    logValueService.addLogValue(equipments.get(0).getEquipmentId(), valueId, logValueDto);
+                    logValueDto.setEquipmentId(equipments.get(0).getEquipmentId());
+                    logValueDto.setValueId(valueId);
+                    logValueService.addLogValue(logValueDto);
                 }
             }
         } catch (Exception e) {

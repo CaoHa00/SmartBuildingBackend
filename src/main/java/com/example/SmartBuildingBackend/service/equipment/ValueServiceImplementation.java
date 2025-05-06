@@ -61,13 +61,9 @@ public class ValueServiceImplementation implements ValueService {
     }
 
     @Override
-    public UUID getValueByName(String nameValue) {
-        List<Value> values = valueRepository.findAll();
-        for(Value i:values){
-            if(i.getValueName().equalsIgnoreCase(nameValue)){
-                return i.getValueId();
-            };
-        }
-       return null;
+    public Value getValueByName(String valueName) {
+        // Make sure Optional is imported correctly
+        return valueRepository.findByValueName(valueName);
     }
+
 }

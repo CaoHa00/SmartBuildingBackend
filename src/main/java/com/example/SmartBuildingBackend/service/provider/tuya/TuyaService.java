@@ -15,13 +15,12 @@ public interface TuyaService {
 
     String getDeviceProperty(List<Equipment> equipments);
 
-    String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
+  //  String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
 
     JSONObject parsePhaseA(String base64Value);
 
     ResponseEntity<String> getResponse(String url, String method, String body);
 
-    LogValueDto addLogValue();
 
     String getListDevicesProperty();
     

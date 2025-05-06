@@ -7,7 +7,7 @@ import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
 
 public interface LogValueService {
-    LogValueDto addLogValue(UUID equipmentId, UUID valueId, LogValueDto logValueDto);
+    LogValueDto addLogValue(LogValueDto logValueDto);
     
     void deleteLogValue(UUID logValueId);
 

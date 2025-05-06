@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.controller;
+package com.example.SmartBuildingBackend.controller.equipment;
 
 import com.example.SmartBuildingBackend.dto.equipment.ValueDto;
 import com.example.SmartBuildingBackend.service.equipment.ValueService;
