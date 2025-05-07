@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.jsoup.select.Elements;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +43,8 @@ import com.example.SmartBuildingBackend.dto.space.SpaceTuyaDto;
 import com.example.SmartBuildingBackend.dto.tuyaResponse.TuyaProperty;
 import com.example.SmartBuildingBackend.dto.tuyaResponse.TuyaResponse;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
+import com.example.SmartBuildingBackend.entity.equipment.LogValue;
 import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.entity.space.Space;
 import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
@@ -145,29 +147,107 @@ public class TuyaServiceImplementation implements TuyaService {
     }
 
     @Override
-    public String getDeviceProperty(List<Equipment> equipments) {
-        String result = "";
-        if (equipments.size() == 0) {
-            result = "No elevator found";
-            return result;
+    public String getElevatorElectric(List<Equipment> electricElevators,
+            List<EquipmentState> electricElevatorStates,
+            Long timeStamp,
+            List<Value> values) {
+        if (electricElevators.isEmpty()) {
+            return "No elevator found";
         }
 
-        for (Equipment equipment : equipments) {
-            String deviceId = equipment.getDeviceId();
+        Map<String, Value> valueMap = new HashMap<>();
+        for (Value value : values) {
+            valueMap.put(value.getValueName(), value);
+        }
+
+        List<EquipmentState> savedEquipmentStates = new ArrayList<>();
+
+        for (Equipment electricElevator : electricElevators) {
+            String deviceId = electricElevator.getDeviceId();
             String method = "GET";
             String body = "";
-            String url = "/v2.0/cloud/thing/" + deviceId + "/shadow/properties"; // API Path
+            String codes = "VoltageA,VoltageB,VoltageC,TotalEnergyConsumed,Current,ActivePower,Temperature";
+            String url = "/v2.0/cloud/thing/" + deviceId + "/shadow/properties?codes=" + codes;
             ResponseEntity<String> response = getResponse(url, method, body);
 
-            String responseBody = processJsonAPIFromServer(response, equipment); // current elevator of b8 is 1
-            System.out.println(responseBody);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(response.getBody());
+
+                if (!rootNode.path("success").asBoolean()) {
+                    System.out.println("Failed to fetch data for deviceId: " + deviceId);
+                    continue;
+                }
+
+                JsonNode properties = rootNode.path("result").path("properties");
+                double voltageSum = 0;
+                double voltageAvg = 0;
+
+                for (JsonNode property : properties) {
+                    String code = property.path("code").asText();
+                    double value = property.path("value").asDouble() / 10.0;
+
+                    if (code.equals("VoltageA") || code.equals("Voltageb") || code.equals("VoltageC")) {
+                        voltageSum += value;
+                    }
+
+                    if (code.equals("VoltageC")) {
+                        voltageAvg = voltageSum / 3;
+                        saveOrUpdateState("voltage", voltageAvg, electricElevator, timeStamp, valueMap,
+                                electricElevatorStates, savedEquipmentStates);
+                    }
+
+                    Map<String, String> codeToValueKey = Map.of(
+                            "TotalEnergyConsumed", "total-energy-consumed",
+                            "Current", "electric-current",
+                            "ActivePower", "active-power",
+                            "Temperature", "temperature");
+
+                    if (codeToValueKey.containsKey(code)) {
+                        saveOrUpdateState(codeToValueKey.get(code), voltageAvg, electricElevator, timeStamp, valueMap,
+                                electricElevatorStates, savedEquipmentStates);
+                    }
+                }
+
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to process Tuya response", e);
+            }
+
+            System.out.println("Finished processing deviceId: " + deviceId);
         }
-        // //electric
-        // if (response.getStatusCode() == HttpStatus.OK && responseBody != null) {
-        // return extractPropertiesFromResponse(responseBody, equipmentDto);
-        // }
-        result = "Elevator Logs Added Success";
-        return result;
+        equipmentStateService.saveAll(savedEquipmentStates);
+
+        return "Elevator Logs Added Success";
+    }
+
+    private void saveOrUpdateState(String valueKey,
+            double responseValue,
+            Equipment electricElevator,
+            Long timeStamp,
+            Map<String, Value> valueMap,
+            List<EquipmentState> existingStates,
+            List<EquipmentState> savedStates) {
+
+        Value value = valueMap.get(valueKey);
+        if (value == null)
+            return;
+
+        Map<UUID, EquipmentState> equipmentStateMap = existingStates.stream()
+                .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(value.getValueId()))
+                .collect(Collectors.toMap(
+                        es -> es.getEquipment().getEquipmentId(),
+                        Function.identity()));
+
+        EquipmentState equipmentState = equipmentStateMap.get(electricElevator.getEquipmentId());
+        if (equipmentState == null) {
+            equipmentState = new EquipmentState();
+            equipmentState.setEquipment(electricElevator);
+            equipmentState.setValue(value);
+        }
+
+        equipmentState.setValueResponse(responseValue);
+        equipmentState.setTimeStamp(timeStamp);
+        savedStates.add(equipmentState);
     }
 
     @Override // Not use
@@ -255,62 +335,10 @@ public class TuyaServiceImplementation implements TuyaService {
         return result.toString();
     }
 
-    // Read and Store to database // Test only for Elevator
-    public String processJsonAPIFromServer(ResponseEntity<String> response, Equipment equipment) {
-        try {
-            TuyaResponse tuyaResponse = mapper.readValue(response.getBody(), TuyaResponse.class);
-
-            if (tuyaResponse == null || !tuyaResponse.isSuccess()) {
-                return response.getBody();
-            }
-
-            final double[] voltages = { -1, -1, -1 }; // [0] = VoltageA, [1] = VoltageB, [2] = VoltageC
-
-            List<TuyaProperty> properties = tuyaResponse.getResult().getProperties();
-            if (properties == null) {
-                return response.getBody();
-            }
-
-            Map<String, Consumer<JsonNode>> handlers = new HashMap<>();
-            handlers.put("VoltageA", value -> voltages[0] = value.asInt() / 10.0);
-            handlers.put("VoltageB", value -> voltages[1] = value.asInt() / 10.0);
-            handlers.put("VoltageC", value -> voltages[2] = value.asInt() / 10.0);
-            handlers.put("TotalEnergyConsumed",
-                    value -> saveLog(equipment, value.asInt() / 10.0, "total-energy-consumed"));
-            handlers.put("Current", value -> saveLog(equipment, value.asInt(), "electric-current"));
-            handlers.put("ActivePower", value -> saveLog(equipment, value.asDouble(), "active-power"));
-            handlers.put("Temperature", value -> saveLog(equipment, value.asDouble() / 10.0, "temperature"));
-
-            for (TuyaProperty property : properties) {
-                String code = property.getCode();
-                JsonNode valueNode = property.getValue();
-
-                Consumer<JsonNode> handler = handlers.get(code);
-                if (handler != null) {
-                    handler.accept(valueNode);
-                } else {
-                }
-            }
-
-            if (voltages[0] != -1 && voltages[1] != -1 && voltages[2] != -1) {
-                double voltageAverage = (voltages[0] + voltages[1] + voltages[2]) / 3.0;
-                saveLog(equipment, voltageAverage, "voltage");
-            } else {
-            }
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process Tuya response", e);
-        }
-
-        return response.getBody();
-    }
-
-    private final ExecutorService executorService = new ThreadPoolExecutor(
-            20, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1000),
-            new ThreadPoolExecutor.CallerRunsPolicy());
-
     @Override
-    public String getLatestStatusDeviceList(List<Equipment> equipments) {
+    public String getStatusLight(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
+            Value valueInput) {
+
         String baseUrl = "/v1.0/iot-03/devices/status";
 
         List<String> deviceIds = equipments.stream()
@@ -325,137 +353,75 @@ public class TuyaServiceImplementation implements TuyaService {
         String fullUrl = baseUrl + "?device_ids=" + UriUtils.encodeQueryParam(queryParam, StandardCharsets.UTF_8);
 
         ResponseEntity<String> response = getResponse(fullUrl, "GET", "");
+        // List<LogValue> logValues = new ArrayList<>(); // save will be coded later
         try {
             JsonNode root = mapper.readTree(response.getBody());
             if (!root.path("success").asBoolean()) {
                 System.out.println("Tuya API response indicates failure.");
                 return response.getBody();
             }
+            JsonNode resultArray = root.path("result");
 
             Map<String, Equipment> equipmentMap = equipments.stream()
                     .collect(Collectors.toMap(Equipment::getDeviceId, Function.identity()));
+            Map<UUID, EquipmentState> equipmentStateMap = equipmentStates.stream()
+                    .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(valueInput.getValueId()))
+                    .collect(Collectors.toMap(
+                            es -> es.getEquipment().getEquipmentId(), // Key: Equipment ID
+                            Function.identity() // Value: The EquipmentState
+                    ));
+            List<EquipmentState> savedEquipmentStates = new ArrayList<>();
 
-            // Map of code -> handler method
-            // Shared state
-            ConcurrentHashMap<String, Boolean> switchStates = new ConcurrentHashMap<>();
-            Map<String, BiConsumer<Equipment, JsonNode>> handlers = new HashMap<>();
-                  // Thread-safe reference to current equipment (assumes handlers receive the same
-            // equipment)
-            AtomicReference<Object> equipmentReference = new AtomicReference<>();
-            Runnable trySave = () -> {
-                if (switchStates.containsKey("switch_1") && switchStates.containsKey("switch_2")) {
-                    boolean switch1 = switchStates.get("switch_1");
-                    boolean switch2 = switchStates.get("switch_2");
+            for (JsonNode deviceStatus : resultArray) {
+                String deviceId = deviceStatus.path("id").asText();
+                JsonNode properties = deviceStatus.path("status"); // This may vary depending on actual Tuya structure
 
-                    double lightStatus = (switch1 || switch2) ? 1.0 : 0.0;
-                    Object equipment = equipmentReference.get(); // Retrieve the current equipment
-
-                    if (equipment != null) {
-                        executorService.submit(() -> saveLog((Equipment) equipmentReference.get(), lightStatus, "light-status"));
-                    }
-                }
-            };
-
-
-            handlers.put("switch_1", (equipment, valueNode) -> {
-                equipmentReference.set(equipment); // update current equipment
-                switchStates.put("switch_1", valueNode.asBoolean());
-                trySave.run();
-            });
-
-            handlers.put("switch_2", (equipment, valueNode) -> {
-                equipmentReference.set(equipment); // update current equipment
-                switchStates.put("switch_2", valueNode.asBoolean());
-                trySave.run();
-            });
-
-            handlers.put("va_temperature", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asInt() / 10.0, "temperature")));
-            handlers.put("va_humidity", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asInt(), "humidity")));
-            handlers.put("battery_percentage", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asDouble(), "battery-percentage")));
-            handlers.put("forward_energy_total", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asDouble() / 100.0, "battery-percentage")));
-            handlers.put("charge_energy", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asDouble(), "charge-energy")));
-            handlers.put("balance_energy", (equipment, valueNode) -> executorService
-                    .submit(() -> saveLog(equipment, valueNode.asDouble(), "balance-energy")));
-            handlers.put("switch_1", (equipment, valueNode) -> {
-                boolean lightSwitch1 = valueNode.asBoolean();
-                double lightStatus = lightSwitch1 ? 1.0 : 0.0; // Set light status based on switch_1
-                executorService.submit(() -> saveLog(equipment, lightStatus, "light-status"));
-            });
-
-            handlers.put("switch_2", (equipment, valueNode) -> {
-                boolean lightSwitch2 = valueNode.asBoolean();
-                double lightStatus = lightSwitch2 ? 1.0 : 0.0; // Set light status based on switch_2
-                executorService.submit(() -> saveLog(equipment, lightStatus, "light-status"));
-            });
-            handlers.put("phase_a", (equipment, valueNode) -> {
-                if (valueNode.isTextual()) {
-                    try {
-                        JSONObject val = new JSONObject(valueNode.asText());
-                        executorService.submit(() -> saveLog(equipment, val.getDouble("voltage"), "voltage"));
-                        executorService
-                                .submit(() -> saveLog(equipment, val.getDouble("electricCurrent"), "electricCurrent"));
-                        executorService.submit(() -> saveLog(equipment, val.getDouble("power"), "power"));
-                    } catch (JSONException e) {
-                        System.err.println(
-                                "Invalid phase_a format for device " + equipment.getDeviceId() + ": " + e.getMessage());
-                    }
-                }
-            });
-
-            for (JsonNode device : root.path("result")) {
-                String deviceId = device.path("id").asText();
                 Equipment equipment = equipmentMap.get(deviceId);
-                if (equipment == null)
+                if (equipment == null) {
+                    System.out.println("No matching Equipment for deviceId: " + deviceId);
                     continue;
+                }
 
-                JsonNode statuses = device.path("status");
+                boolean switch1 = false;
+                boolean switch2 = false;
 
-                for (JsonNode status : statuses) {
-                    String code = status.path("code").asText();
-                    JsonNode valueNode = status.path("value");
+                for (JsonNode property : properties) {
+                    String code = property.path("code").asText();
+                    boolean valueCheck = property.path("value").asBoolean();
 
-                    // Dispatch to corresponding handler based on code
-                    BiConsumer<Equipment, JsonNode> handler = handlers.get(code);
-                    if (handler != null) {
-                        handler.accept(equipment, valueNode);
-                    } else {
-                        System.out.println("Unhandled code: " + code);
+                    if ("switch_1".equals(code)) {
+                        switch1 = valueCheck;
+                    } else if ("switch_2".equals(code)) {
+                        switch2 = valueCheck;
+                        break;
                     }
                 }
-            }
 
+                Double status = (!switch1 && !switch2) ? 0.0 : 1.0;
+
+                EquipmentState equipmentState = equipmentStateMap.get(equipment.getEquipmentId());
+
+                if (equipmentState == null) {
+                    // Create or reset the EquipmentState if value is null or doesn't match
+                    equipmentState = new EquipmentState();
+                    equipmentState.setEquipment(equipment);
+                    equipmentState.setValue(valueInput);
+                }
+                // Always update valueResponse and timestamp
+                if (!equipmentState.getValueResponse().equals(status)) {
+                    equipmentState.setValueResponse(status);
+                    savedEquipmentStates.add(equipmentState);
+                }
+                equipmentState.setTimeStamp(timeStamp);
+                // add
+            }
+            equipmentStateService.saveAll(savedEquipmentStates);
         } catch (JsonProcessingException e) {
             System.err.println("Failed to parse Tuya response JSON: " + e.getMessage());
             throw new RuntimeException("Failed to process Tuya response", e);
         }
 
         return response.getBody();
-    }
-
-    private final ConcurrentHashMap<UUID, Lock> equipmentLocks = new ConcurrentHashMap<>();
-
-    private void saveLog(Equipment equipment, double valueResponse, String valueName) {
-        if (equipment == null) {
-            return;
-        }
-
-        EquipmentStateDto equipmentStateDto = new EquipmentStateDto();
-        equipmentStateDto.setTimeStamp(System.currentTimeMillis());
-        equipmentStateDto.setValueResponse(valueResponse);
-        equipmentStateDto.setEquipmentId(equipment.getEquipmentId());
-
-        Lock lock = equipmentLocks.computeIfAbsent(equipment.getEquipmentId(), k -> new ReentrantLock());
-        lock.lock();
-        try {
-            equipmentStateService.saveOrUpdateEquipmentState(equipmentStateDto, valueName);
-        } finally {
-            lock.unlock();
-        }
     }
 
     public Double getFormattedTemperature(JsonNode statusArray) {
@@ -467,18 +433,6 @@ public class TuyaServiceImplementation implements TuyaService {
             }
         }
         return null; // or throw exception if not found
-    }
-
-    @PreDestroy
-    public void shutdownExecutor() {
-        executorService.shutdown();
-        try {
-            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executorService.shutdownNow();
-        }
     }
 
     @Override

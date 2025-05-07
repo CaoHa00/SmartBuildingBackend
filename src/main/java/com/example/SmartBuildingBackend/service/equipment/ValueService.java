@@ -18,4 +18,6 @@ public interface ValueService {
     ValueDto updateValue(UUID valueId, ValueDto valueDto);
 
     Value getValueByName(String nameValue);
+
+    List<Value> getCachedValues();
 }

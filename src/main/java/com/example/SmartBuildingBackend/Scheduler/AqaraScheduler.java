@@ -20,14 +20,14 @@ public class AqaraScheduler {
         this.equipmentRepository = equipmentRepository;
     }
 
-    @Scheduled(fixedRateString = "${aqara.sync.interval:1800000}")
-    public void autoQueryTemperature() {
-        List<Equipment> equipments = equipmentRepository.findByCategory_CategoryName("sensor");
-        try {
-            String result = aqaraService.fetchAndProcessCurrentValue(equipments);
-            System.out.println("Synced data for equipment : " + result);
-        } catch (Exception e) {
-            System.err.println("Failed to sync equipment : " + e.getMessage());
-        }
-    }
+    // @Scheduled(fixedRateString = "${aqara.sync.interval:1800000}")
+    // public void autoQueryTemperature() {
+    //     List<Equipment> equipments = equipmentRepository.findByCategory_CategoryName("sensor");
+    //     try {
+    //         String result = aqaraService.fetchAndProcessCurrentValue(equipments);
+    //         System.out.println("Synced data for equipment : " + result);
+    //     } catch (Exception e) {
+    //         System.err.println("Failed to sync equipment : " + e.getMessage());
+    //     }
+    // }
 }

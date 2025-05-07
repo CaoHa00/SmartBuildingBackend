@@ -3,12 +3,17 @@ package com.example.SmartBuildingBackend.service.equipment;
 import java.util.List;
 
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentStateDto;
+import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
 
 public interface EquipmentStateService {
     
-    public EquipmentStateDto saveOrUpdateEquipmentState(EquipmentStateDto equipmentStateDto, String valueName);
+    // EquipmentStateDto saveOrUpdateEquipmentState(EquipmentStateDto equipmentStateDto, String valueName);
 
-    List<EquipmentStateDto> getAllEquipmentStates(); // NEW METHOD
+    List<EquipmentStateDto> getAllEquipmentStates();
+
+    List<EquipmentState> saveAll(List<EquipmentState> equipmentStates);
+    
+    List<EquipmentState> getCachedEquipmentStates();
 }
 
 

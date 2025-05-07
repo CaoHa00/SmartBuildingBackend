@@ -19,6 +19,7 @@ public interface LogValueService {
 
     List<LogValue> getLatestStatusList(UUID equipmentId);
     
+   List<LogValue> saveAll(List<LogValue> LogValues);
 
 
 }
