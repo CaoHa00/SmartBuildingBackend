@@ -4,28 +4,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.select.Elements;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,44 +24,25 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
 import org.springframework.http.MediaType;
 
-import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
-import com.example.SmartBuildingBackend.dto.equipment.EquipmentStateDto;
-import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.dto.space.SpaceTuyaDto;
-import com.example.SmartBuildingBackend.dto.tuyaResponse.TuyaProperty;
-import com.example.SmartBuildingBackend.dto.tuyaResponse.TuyaResponse;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
-import com.example.SmartBuildingBackend.entity.equipment.LogValue;
 import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.entity.space.Space;
-import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
 import com.example.SmartBuildingBackend.repository.space.SpaceRepository;
-import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentStateService;
-import com.example.SmartBuildingBackend.service.equipment.LogValueService;
-import com.example.SmartBuildingBackend.service.equipment.ValueService;
 import com.example.SmartBuildingBackend.service.space.SpaceTuyaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @RequiredArgsConstructor
 public class TuyaServiceImplementation implements TuyaService {
-    private com.example.SmartBuildingBackend.entity.equipment.Value value;
     private final TuyaSignatureHelper tuyaSignatureHelper;
-    private final EquipmentService equipmentService;
     private final EquipmentStateService equipmentStateService;
-    private final ValueService valueService;
-    private final LogValueService logValueService;
     private final SpaceTuyaService spaceTuyaService;
-    private final EquipmentRepository equipmentRepository;
     private final SpaceRepository spaceRepository;
     private final TuyaProperties tuyaProperties;
 
@@ -186,17 +155,16 @@ public class TuyaServiceImplementation implements TuyaService {
                 for (JsonNode property : properties) {
                     String code = property.path("code").asText();
                     double value = property.path("value").asDouble();
-                    
 
                     if (code.equals("VoltageA") || code.equals("VoltageB") || code.equals("VoltageC")) {
                         voltageSum += value;
                     }
 
                     if (code.equals("VoltageC")) {
-                        voltageAvg = (voltageSum / 3)/10.0;
+                        voltageAvg = (voltageSum / 3) / 10.0;
                         saveOrUpdateState("voltage", voltageAvg, electricElevator, timeStamp, valueMap,
                                 electricElevatorStates, savedEquipmentStates);
-                                continue;
+                        continue;
                     }
 
                     Map<String, String> codeToValueKey = Map.of(
@@ -229,14 +197,14 @@ public class TuyaServiceImplementation implements TuyaService {
             Map<String, Value> valueMap,
             List<EquipmentState> existingStates,
             List<EquipmentState> savedStates) {
-        if(valueKey.equals("active-power")||valueKey.equals("electric-current") ){
-            responseValue/=1000;
+        if (valueKey.equals("active-power") || valueKey.equals("electric-current")) {
+            responseValue /= 1000;
         }
-        if(valueKey.equals("total-energy-consumed")){
-            responseValue/=100;
+        if (valueKey.equals("total-energy-consumed")) {
+            responseValue /= 100;
         }
-        if(valueKey.equals("temperature")){
-            responseValue/=10;
+        if (valueKey.equals("temperature")) {
+            responseValue /= 10;
         }
         Value value = valueMap.get(valueKey);
         if (value == null)
@@ -253,7 +221,7 @@ public class TuyaServiceImplementation implements TuyaService {
             equipmentState = new EquipmentState();
             equipmentState.setEquipment(electricElevator);
             equipmentState.setValue(value);
-        }else{
+        } else {
         }
 
         equipmentState.setValueResponse(responseValue);
@@ -346,24 +314,27 @@ public class TuyaServiceImplementation implements TuyaService {
         return result.toString();
     }
 
-    @Override
-    public String getStatusLight(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
-            Value valueInput) {
-
+    private ResponseEntity<String> sendResponseV01(List<Equipment> equipments) {
         String baseUrl = "/v1.0/iot-03/devices/status";
 
         List<String> deviceIds = equipments.stream()
                 .map(Equipment::getDeviceId)
                 .filter(Objects::nonNull)
                 .toList();
-
         if (deviceIds.isEmpty())
-            return "[]";
+            return null;
 
         String queryParam = String.join(",", deviceIds);
         String fullUrl = baseUrl + "?device_ids=" + UriUtils.encodeQueryParam(queryParam, StandardCharsets.UTF_8);
-
         ResponseEntity<String> response = getResponse(fullUrl, "GET", "");
+        return response;
+    }
+
+    @Override
+    public String getStatusElectric(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
+            List<Value> values) {
+        ResponseEntity<String> response = sendResponseV01(equipments);
+
         // List<LogValue> logValues = new ArrayList<>(); // save will be coded later
         try {
             JsonNode root = mapper.readTree(response.getBody());
@@ -375,17 +346,125 @@ public class TuyaServiceImplementation implements TuyaService {
 
             Map<String, Equipment> equipmentMap = equipments.stream()
                     .collect(Collectors.toMap(Equipment::getDeviceId, Function.identity()));
-            Map<UUID, EquipmentState> equipmentStateMap = equipmentStates.stream()
-                    .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(valueInput.getValueId()))
-                    .collect(Collectors.toMap(
-                            es -> es.getEquipment().getEquipmentId(), // Key: Equipment ID
-                            Function.identity() // Value: The EquipmentState
-                    ));
+
+            Map<String, Value> valueMap = new HashMap<>();
+            for (Value value : values) {
+                valueMap.put(value.getValueName(), value);
+            }
             List<EquipmentState> savedEquipmentStates = new ArrayList<>();
 
             for (JsonNode deviceStatus : resultArray) {
                 String deviceId = deviceStatus.path("id").asText();
-                JsonNode properties = deviceStatus.path("status"); // This may vary depending on actual Tuya structure
+                JsonNode properties = deviceStatus.path("status");
+
+                Equipment equipment = equipmentMap.get(deviceId);
+                if (equipment == null) {
+                    System.out.println("No matching Equipment for deviceId: " + deviceId);
+                    continue;
+                }
+                double energyTotal = 0;
+
+                for (JsonNode property : properties) {
+                    String code = property.path("code").asText();
+                    double valueCheck = property.path("value").asDouble();
+
+                    if ("forward_energy_total".equals(code)) {
+                        Value valueInput = valueMap.get("total-energy-consumed");
+                        energyTotal = valueCheck / 100.0;
+                        EquipmentState equipmentStateToSave = updateOrCreateStates(equipment, valueInput, energyTotal,
+                                timeStamp, equipmentStates);
+                        savedEquipmentStates.add(equipmentStateToSave);
+                    } else if ("phase_a".equals(code)) {
+                        String phaseAString = property.get("value").asText(); // Get the raw string
+                        try {
+                            JSONObject val = new JSONObject(phaseAString); // Parse the inner JSON string
+
+                            double voltage = val.getDouble("voltage");
+                            double current = val.getDouble("electricCurrent");
+                            double active_power = val.getDouble("power");
+
+                            Value valueVoltage = valueMap.get("voltage");
+                            Value valueCurrent = valueMap.get("electric-current");
+                            Value valueActivePower = valueMap.get("active-power");
+
+                            if (valueVoltage != null && valueCurrent != null && valueActivePower != null) {
+                                EquipmentState voltageToSave = updateOrCreateStates(equipment, valueVoltage, voltage,
+                                        timeStamp, equipmentStates);
+                                EquipmentState currentToSave = updateOrCreateStates(equipment, valueCurrent, current,
+                                        timeStamp, equipmentStates);
+                                EquipmentState activePowerToSave = updateOrCreateStates(equipment, valueActivePower,
+                                        active_power, timeStamp, equipmentStates);
+
+                                savedEquipmentStates.add(voltageToSave);
+                                savedEquipmentStates.add(currentToSave);
+                                savedEquipmentStates.add(activePowerToSave);
+                            } else {
+                                System.out.println("Missing Value mapping for voltage/current/active_power.");
+                            }
+
+                        } catch (JSONException e) {
+                            System.out.println("Failed to parse phase_a JSON string: " + phaseAString);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            equipmentStateService.saveAll(savedEquipmentStates);
+        } catch (JsonProcessingException e) {
+            System.err.println("Failed to parse Tuya response JSON: " + e.getMessage());
+            throw new RuntimeException("Failed to process Tuya response", e);
+        }
+        return response.getBody();
+    }
+
+    private EquipmentState updateOrCreateStates(Equipment equipment, Value valueInput, double valueResponse,
+            Long timeStamp, List<EquipmentState> equipmentStates) {
+        Map<UUID, EquipmentState> equipmentStateMap = equipmentStates.stream()
+                .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(valueInput.getValueId()))
+                .collect(Collectors.toMap(
+                        es -> es.getEquipment().getEquipmentId(), // Key: Equipment ID
+                        Function.identity() // Value: The EquipmentState
+                ));
+        EquipmentState equipmentState = equipmentStateMap.get(equipment.getEquipmentId());
+        if (equipmentState == null) {
+            equipmentState = new EquipmentState();
+            equipmentState = new EquipmentState();
+            equipmentState.setEquipment(equipment);
+            equipmentState.setValue(valueInput);
+            equipmentState.setValueResponse(valueResponse);
+            equipmentState.setTimeStamp(timeStamp);
+        } else if (!equipmentState.getValueResponse().equals(valueResponse)) { // if #value -> add
+            equipmentState.setValueResponse(valueResponse);
+            equipmentState.setTimeStamp(timeStamp);
+        }
+        return equipmentState;
+    }
+
+    @Override
+    public String getStatusLight(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
+            Value valueInput) {
+        ResponseEntity<String> response = sendResponseV01(equipments);
+
+        // List<LogValue> logValues = new ArrayList<>(); // save will be coded later
+        try {
+            JsonNode root = mapper.readTree(response.getBody());
+            if (!root.path("success").asBoolean()) {
+                System.out.println("Tuya API response indicates failure.");
+                return response.getBody();
+            }
+            JsonNode resultArray = root.path("result");
+
+            Map<String, Equipment> equipmentMap = equipments.stream()
+                    .collect(Collectors.toMap(Equipment::getDeviceId, Function.identity()));
+            Map<UUID, EquipmentState> equipmentStateMap = equipmentStates.stream().collect(Collectors.toMap(
+                    es -> es.getEquipment().getEquipmentId(), // Key: Equipment ID
+                    Function.identity() // Value: The EquipmentState
+            ));
+            List<EquipmentState> savedEquipmentStates = new ArrayList<>();
+
+            for (JsonNode deviceStatus : resultArray) {
+                String deviceId = deviceStatus.path("id").asText();
+                JsonNode properties = deviceStatus.path("status");
 
                 Equipment equipment = equipmentMap.get(deviceId);
                 if (equipment == null) {
@@ -420,21 +499,18 @@ public class TuyaServiceImplementation implements TuyaService {
                     equipmentState.setValueResponse(status);
                     equipmentState.setTimeStamp(timeStamp);
                     savedEquipmentStates.add(equipmentState);
-                }else if (!equipmentState.getValueResponse().equals(status)) { // if #value -> add
+                } else if (!equipmentState.getValueResponse().equals(status)) { // if #value -> add
                     equipmentState.setValueResponse(status);
                     equipmentState.setTimeStamp(timeStamp);
                     savedEquipmentStates.add(equipmentState);
                 }
 
-           
-               
             }
             equipmentStateService.saveAll(savedEquipmentStates);
         } catch (JsonProcessingException e) {
             System.err.println("Failed to parse Tuya response JSON: " + e.getMessage());
             throw new RuntimeException("Failed to process Tuya response", e);
         }
-
         return response.getBody();
     }
 
@@ -463,71 +539,6 @@ public class TuyaServiceImplementation implements TuyaService {
             return resultObj.toString(); // Safely return numeric/string space ID
         }
     }
-
-    // @Override
-    // public String extractPropertiesFromResponse(String responseBody, EquipmentDto
-    // equipmentDto) {
-    // JSONObject valueJson = new JSONObject();
-    // JSONObject sendJson = new JSONObject();
-    // double energyTotal = 0;
-    // long timestamp = 0;
-
-    // try {
-    // JSONObject jsonResponse = new JSONObject(responseBody);
-    // JSONObject result = jsonResponse.getJSONObject("result");
-
-    // JSONArray properties = result.getJSONArray("properties");
-    // timestamp = jsonResponse.getLong("t");
-
-    // for (int i = 0; i < properties.length(); i++) {
-    // JSONObject property = properties.getJSONObject(i);
-    // String code = property.getString("code");
-    // Object value = property.get("value");
-
-    // if ("forward_energy_total".equals(code)) {
-    // energyTotal = ((Number) value).doubleValue() / 100.0;
-    // valueJson.put("total power", energyTotal);
-    // sendJson.put("forward_energy_power", energyTotal);
-    // } else if ("phase_a".equals(code)) {
-    // if (value instanceof String) {
-    // JSONObject val = parsePhaseA((String) value);
-    // valueJson.put("voltage", val.getDouble("voltage"));
-    // valueJson.put("current", val.getDouble("current"));
-    // valueJson.put("active power", val.getDouble("power"));
-
-    // sendJson.put("voltage", val.getDouble("voltage"));
-    // sendJson.put("current", val.getDouble("current"));
-    // sendJson.put("active_power", val.getDouble("power"));
-    // } else {
-    // return "Invalid phase_a value format.";
-    // }
-    // }
-    // }
-
-    // UUID equipmentId = equipmentDto.getEquipmentId();
-    // Iterator<String> keys = valueJson.keys();
-    // while (keys.hasNext()) {
-    // String key = keys.next();
-    // if(key!=null){
-    // Value value = valueService.getValueByName(key); // assumes this does a lookup
-    // }
-
-    // LogValueDto logValueDto = new LogValueDto();
-    // logValueDto.setTimeStamp(timestamp);
-    // logValueDto.setValueResponse(valueJson.getDouble(key));
-    // logValueDto.setEquipmentId(equipmentId);
-    // logValueDto.setLogValueId(value.getValueId());
-    // logValueService.addLogValue(logValueDto);
-    // }
-
-    // sendJson.put("timestamp", timestamp);
-
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // return "Error processing response: " + e.getMessage();
-    // }
-    // return sendJson.toString();
-    // }
 
     @Override
     public JSONObject parsePhaseA(String base64Value) {
