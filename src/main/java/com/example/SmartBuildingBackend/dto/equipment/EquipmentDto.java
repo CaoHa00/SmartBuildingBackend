@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
-
+import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +30,5 @@ public class EquipmentDto {
     private UUID spaceId;
     private List<LogValue> logValues;
     private UUID categoryId;
+    private List<EquipmentState> EquipmentStates;
 }

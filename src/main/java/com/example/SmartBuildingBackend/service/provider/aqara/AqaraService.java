@@ -27,7 +27,7 @@ public interface AqaraService {
 
     String refreshToken() throws Exception;
 
-    ObjectNode processJsonAPIFromServer(String response,List<Equipment> equipments, Long value);
+    // ObjectNode processJsonAPIFromServer(String response,List<Equipment> equipments, Long value);
 
     String queryTemparatureAttributes(List<Equipment> equipments) throws Exception;
 
@@ -35,7 +35,7 @@ public interface AqaraService {
      
     String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception;
 
-     public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException;
+    //  public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException;
   
     
 }

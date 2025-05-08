@@ -1,4 +1,4 @@
-package com.example.SmartBuildingBackend.controller;
+package com.example.SmartBuildingBackend.controller.equipment;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,16 +89,16 @@ public class AqaraController {
     // }
     // }
 
-    @PostMapping("/light-control")
-    public ResponseEntity<String> controlLight(@RequestParam Long value,@RequestParam Long buttonPosition, @RequestBody UUID equipmentId)
-            throws Exception {
-        String response = aqaraService.queryLightControl(equipmentId, value, buttonPosition);
-        Equipment equipment = equipmentRepository.findById(equipmentId).orElseThrow();
-        List<Equipment> equipmentList = Collections.singletonList(equipment);
-        ObjectNode processedJson = aqaraService.processJsonAPIFromServer(response, equipmentList, value);
-        String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
-        return ResponseEntity.ok(updatedResponse);
-    }
+    // @PostMapping("/light-control")
+    // public ResponseEntity<String> controlLight(@RequestParam Long value,@RequestParam Long buttonPosition, @RequestBody UUID equipmentId)
+    //         throws Exception {
+    //     String response = aqaraService.queryLightControl(equipmentId, value, buttonPosition);
+    //     Equipment equipment = equipmentRepository.findById(equipmentId).orElseThrow();
+    //     List<Equipment> equipmentList = Collections.singletonList(equipment);
+    //     ObjectNode processedJson = aqaraService.processJsonAPIFromServer(response, equipmentList, value);
+    //     String updatedResponse = new ObjectMapper().writeValueAsString(processedJson);
+    //     return ResponseEntity.ok(updatedResponse);
+    // }
     @PostMapping("/authorization-verification-code")
     public ResponseEntity<String> authorizationVerificationCode() {
         try {

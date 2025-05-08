@@ -13,8 +13,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogValueDto {
-    private UUID logValueId;
+public class EquipmentStateDto {
+    private UUID equipmentStateId;
 
     @NotBlank(message = "timestamp is required")
     private long timeStamp;
@@ -22,8 +22,7 @@ public class LogValueDto {
     @NotNull(message = "Equipment type is required")
     private UUID equipmentId;
 
-    @NotNull(message = "value is required")
-    private UUID valueId;
+    private UUID  valueId;
 
     @NotNull(message = "value response is required")
     private Double valueResponse;

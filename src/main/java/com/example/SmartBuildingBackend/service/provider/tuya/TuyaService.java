@@ -9,31 +9,33 @@ import org.springframework.http.ResponseEntity;
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
+import com.example.SmartBuildingBackend.entity.equipment.Value;
 
 public interface TuyaService {
-    String getAccessToken(String url, String method, String body);
+  String getAccessToken(String url, String method, String body);
 
-    String getDeviceProperty(List<Equipment> equipments);
+  String getElevatorElectric(List<Equipment> electricElevators, List<EquipmentState> electricElevatorStates,
+      Long timeStamp,
+      List<Value> values);
 
-    String extractPropertiesFromResponse(String responseBody, EquipmentDto equipment);
+  // String extractPropertiesFromResponse(String responseBody, EquipmentDto
+  // equipment);
 
-    JSONObject parsePhaseA(String base64Value);
+  JSONObject parsePhaseA(String base64Value);
 
-    ResponseEntity<String> getResponse(String url, String method, String body);
+  ResponseEntity<String> getResponse(String url, String method, String body);
 
-    LogValueDto addLogValue();
+  String getListDevicesProperty();
 
-    String getListDevicesProperty();
-    
-    String createTuyaSpace(String spaceName, UUID spaceId);
-    
-    String getResponseSpaceIdFromBody(String responseBody);
+  String createTuyaSpace(String spaceName, UUID spaceId);
 
-    String createTuyaGroup(String spaceTuyaPlatformId, String groupName);
+  String getResponseSpaceIdFromBody(String responseBody);
 
-    String getLatestStatusDeviceList(List<Equipment> equipments);
+  String createTuyaGroup(String spaceTuyaPlatformId, String groupName);
 
-    String controlLight(UUID spaceId, int valueLight);
+  String getStatusLight(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp, Value value);
 
-    
+  String controlLight(UUID spaceId, int valueLight);
+
 }

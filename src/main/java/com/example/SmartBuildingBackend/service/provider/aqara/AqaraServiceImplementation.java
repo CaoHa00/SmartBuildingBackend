@@ -19,7 +19,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
+import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
+import com.example.SmartBuildingBackend.repository.equipment.ValueRepository;
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
 import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
@@ -35,6 +37,9 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.MessagePart;
+
+import jakarta.websocket.OnError;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,6 +65,7 @@ public class AqaraServiceImplementation implements AqaraService {
     private static int DEFAULT_TEMPERATURE = 0;
     private final WeatherService weatherService;
     private EquipmentService equipmentService;
+    private final ValueRepository valueRepository;
 
     @Override
     public String sendRequestToAqara(Map<String, Object> requestBody) throws Exception {
@@ -139,18 +145,18 @@ public class AqaraServiceImplementation implements AqaraService {
         return sendAqaraRequest(requestBody);
     }
 
-    @Override
-    public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException {
-        String response = "";
-        try {
-            response = queryTemparatureAttributes(equipments);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Long value = 0L;
-        ObjectNode processedJson = processJsonAPIFromServer(response, equipments, value);
-        return new ObjectMapper().writeValueAsString(processedJson);
-    }
+    // @Override
+    // public String fetchAndProcessCurrentValue(List<Equipment> equipments) throws JsonProcessingException {
+    //     String response = "";
+    //     try {
+    //         response = queryTemparatureAttributes(equipments);
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     Long value = 0L;
+    //     ObjectNode processedJson = processJsonAPIFromServer(response, equipments, value);
+    //     return new ObjectMapper().writeValueAsString(processedJson);
+    // }
 
     @Override
     public String queryLightControl(UUID equipmentId, Long value, Long buttonPosition) throws Exception {
@@ -217,63 +223,71 @@ public class AqaraServiceImplementation implements AqaraService {
         return sendAqaraRequest(requestBody);
     }
 
-    @Override
-    public ObjectNode processJsonAPIFromServer(String response, List<Equipment> equipments, Long value) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode result = objectMapper.createObjectNode();
-        try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            ArrayNode resultArray = (ArrayNode) rootNode.get("result");
-            LogValueDto logValueDto = new LogValueDto();
-            for (JsonNode node : resultArray) {
-                if (node.get("value") != null) {
-                    JsonNode valueNode = node.get("value");
-                    String resourceId = node.get("resourceId").asText();
-                    String timeStamp = node.get("timeStamp").asText();
-                    String subjectId = node.get("subjectId").asText();
-                    UUID equipmentId = null;
-                    for (Equipment equipment : equipments) {
-                        if (subjectId.equalsIgnoreCase(equipment.getDeviceId())) {
-                            equipmentId = equipment.getEquipmentId();
-                        }
-                    }
-                    if (equipmentId != null) {
-                        // Extract temperature value if the resourceId matches
-                        if (valueNode != null && resourceId.equals("0.1.85")) {
-                            String temperature = valueNode.asText().substring(0, 2);
-                            result.put("temperature", temperature);
-                            DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
-                            // input LogValue to store value
-                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                            logValueDto.setValueResponse(node.get("value").asDouble());
-                            UUID valueId = valueService.getValueByName("temperature");
-                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
-                        }
-                        if (valueNode != null && resourceId.equals("0.2.85")) {
-                            result.put("humidity", valueNode.asText().substring(0, 2));
-                            // input LogValue to store value
-                            logValueDto.setTimeStamp(node.get("timeStamp").asLong());
-                            logValueDto.setValueResponse(node.get("value").asDouble());
-                            UUID valueId = valueService.getValueByName("humidity");
-                         
-                            logValueService.addLogValue(equipmentId, valueId, logValueDto);
+    // @Override
+    // public ObjectNode processJsonAPIFromServer(String response, List<Equipment> equipments, Long value) {
+    //     ObjectMapper objectMapper = new ObjectMapper();
+    //     ObjectNode result = objectMapper.createObjectNode();
+    //     try {
+    //         JsonNode rootNode = objectMapper.readTree(response);
+    //         ArrayNode resultArray = (ArrayNode) rootNode.get("result");
+    //         LogValueDto logValueDto = new LogValueDto();
+    //         for (JsonNode node : resultArray) {
+    //             if (node.get("value") != null) {
+    //                 JsonNode valueNode = node.get("value");
+    //                 String resourceId = node.get("resourceId").asText();
+    //                 String timeStamp = node.get("timeStamp").asText();
+    //                 String subjectId = node.get("subjectId").asText();
+    //                 UUID equipmentId = null;
+    //                 for (Equipment equipment : equipments) {
+    //                     if (subjectId.equalsIgnoreCase(equipment.getDeviceId())) {
+    //                         equipmentId = equipment.getEquipmentId();
+    //                     }
+    //                 }
+    //                 if (equipmentId != null) {
+    //                     // Extract temperature value if the resourceId matches
+    //                     if (valueNode != null && resourceId.equals("0.1.85")) {
+    //                         String temperature = valueNode.asText().substring(0, 2);
+    //                         result.put("temperature", temperature);
+    //                         DEFAULT_TEMPERATURE = Integer.parseInt(temperature);
+    //                         // input LogValue to store value
+    //                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+    //                         logValueDto.setValueResponse(node.get("value").asDouble());
+    //                         Value valueInDB = valueService.getValueByName("temperature");
+    //                         UUID valueId = valueInDB.getValueId();
+    //                         logValueDto.setEquipmentId(equipmentId);
+    //                         logValueDto.setValueId(valueId);
+    //                         logValueService.addLogValue(logValueDto);
+    //                     }
+    //                     if (valueNode != null && resourceId.equals("0.2.85")) {
+    //                         result.put("humidity", valueNode.asText().substring(0, 2));
+    //                         // input LogValue to store value
+    //                         logValueDto.setTimeStamp(node.get("timeStamp").asLong());
+    //                         logValueDto.setValueResponse(node.get("value").asDouble());
+    //                         Value valueInDB =  valueService.getValueByName("humidity");
+    //                         UUID valueId = valueInDB.getValueId();
+    //                         logValueDto.setEquipmentId(equipmentId);
+    //                         logValueDto.setValueId(valueId);
+    //                         logValueService.addLogValue(logValueDto);
     
-                        }
-                        result.put("timeStamp", timeStamp);
-                    }
-                }
-                if (node.get("errorCode") != null) {
-                    UUID valueId = valueService.getValueByName("light-status");
-                    logValueDto.setTimeStamp(System.currentTimeMillis());
-                    logValueDto.setValueResponse((double) value);
-                    logValueService.addLogValue(equipments.get(0).getEquipmentId(), valueId, logValueDto);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing JSON response", e);
-        }
-        return result;
-    }
+    //                     }
+    //                     result.put("timeStamp", timeStamp);
+    //                 }
+    //             }
+    //             if (node.get("errorCode") != null) {
+    //                 Value valueInDB =  valueService.getValueByName("light-status");
+    //                 UUID valueId =  valueInDB.getValueId();
+    //                 logValueDto.setTimeStamp(System.currentTimeMillis());
+    //                 logValueDto.setValueResponse((double) value);
+    //                 logValueDto.setEquipmentId(equipments.get(0).getEquipmentId());
+    //                 logValueDto.setValueId(valueId);
+    //                 logValueService.addLogValue(logValueDto);
+    //             }
+    //         }
+    //     } catch (Exception e) {
+    //         throw new RuntimeException("Error processing JSON response", e);
+    //     }
+    //     return result;
+    // }
 
     @Override
     public String convertToJson(Map<String, Object> request) {

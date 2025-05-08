@@ -1,12 +1,16 @@
 package com.example.SmartBuildingBackend.controller.space;
 
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
+import com.example.SmartBuildingBackend.dto.equipment.EquipmentStateDto;
 import com.example.SmartBuildingBackend.dto.space.SpaceDto;
+import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
+import com.example.SmartBuildingBackend.mapper.equipment.EquipmentMapper;
+import com.example.SmartBuildingBackend.mapper.equipment.EquipmentStateMapper;
+import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
 import com.example.SmartBuildingBackend.service.equipment.LogValueService;
 import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 import com.example.SmartBuildingBackend.service.space.*;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,12 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -31,11 +33,12 @@ public class SpaceController {
     private final SpaceService spaceService;
     private final TuyaService tuyaService;
     private final LogValueService logValueService;
+
     @PostMapping
     public ResponseEntity<?> createSpace(@RequestBody SpaceDto dto) {
         try {
             SpaceDto created = spaceService.createSpace(dto);
-          //  tuyaService.createTuyaSpace(created.getSpaceName(), created.getSpaceId());
+            // tuyaService.createTuyaSpace(created.getSpaceName(), created.getSpaceId());
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Space created successfully",
@@ -56,8 +59,8 @@ public class SpaceController {
         return ResponseEntity.ok(spaceService.getSpaceById(id));
     }
 
-     @PostMapping("/{id}/light-control")
-    public ResponseEntity<String> controlLight(@RequestParam int value,@PathVariable UUID id)
+    @PostMapping("/{id}/light-control")
+    public ResponseEntity<String> controlLight(@RequestParam int value, @PathVariable UUID id)
             throws Exception {
         String response = tuyaService.controlLight(id, value);
         return ResponseEntity.ok(response);
@@ -83,6 +86,7 @@ public class SpaceController {
         spaceService.deleteSpace(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/{space_id}/status")
     public ResponseEntity<List<Map<String, Object>>> getStatusBySpace(@PathVariable("space_id") UUID spaceId) {
         SpaceDto spaceDto = spaceService.getSpaceById(spaceId);
@@ -91,17 +95,21 @@ public class SpaceController {
         List<Map<String, Object>> statusList = new ArrayList<>();
 
         for (EquipmentDto equipment : equipmentList) {
-            List<LogValue> latestStatuses = Optional.ofNullable(
-                    logValueService.getLatestStatusList(equipment.getEquipmentId())).orElse(Collections.emptyList());
-            for (LogValue log : latestStatuses) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("valueName", log.getValue().getValueName());
-                map.put("valueResponse", log.getValueResponse());
-                map.put("equipmentName", equipment.getEquipmentName()); // optional
-                map.put("equipmentId", equipment.getEquipmentId());
-                statusList.add(map);
+            List<EquipmentState> states = equipment.getEquipmentStates();
+            if (states != null) {
+                for (EquipmentState state : states) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("valueName", state.getValue().getValueName());
+                    map.put("valueResponse", state.getValueResponse());
+                    map.put("equipmentName", equipment.getEquipmentName());
+                    map.put("equipmentId", equipment.getEquipmentId());
+                    map.put("timeStamp", state.getTimeStamp());
+                    statusList.add(map);
+                }
             }
         }
+
         return ResponseEntity.ok(statusList);
     }
+
 }
