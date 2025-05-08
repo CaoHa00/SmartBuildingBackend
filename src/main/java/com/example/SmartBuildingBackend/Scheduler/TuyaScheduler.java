@@ -20,6 +20,7 @@ import com.example.SmartBuildingBackend.service.equipment.EquipmentStateService;
 import com.example.SmartBuildingBackend.service.equipment.ValueService;
 import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,88 +29,100 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TuyaScheduler {
 
-    @Autowired
-    private final TuyaService tuyaService;
+        @Autowired
+        private final TuyaService tuyaService;
 
-    @Autowired
-    private EquipmentService equipmentService;
+        @Autowired
+        private EquipmentService equipmentService;
 
-    @Autowired
-    private ValueService valueService;
+        @Autowired
+        private ValueService valueService;
 
-    @Autowired
-    private EquipmentStateService equipmentStateService;
+        @Autowired
+        private EquipmentStateService equipmentStateService;
 
-    private List<Equipment> switchLights = equipmentService.getCachedEquipments().stream()
-            .filter(e -> "switch".equalsIgnoreCase(e.getCategory().getCategoryName())
-                    && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
-            .toList();
+        private List<Equipment> switchLights;
+        private List<Equipment> electricElevators;
+        private List<EquipmentState> electricElevatorStates;
+        private List<EquipmentState> switchLightStates;
+        private List<Value> listElevatorValues;
+        private List<Value> switchLightValues;
 
-    // @Scheduled(fixedRateString = "${tuya.sync.interval.switchLight}")
-    // public void syncSwitchLightDevices() {
-    //     Long timeStamp = System.currentTimeMillis();
+        @PostConstruct
+        public void init() {
+                List<Equipment> allEquipments = equipmentService.getCachedEquipments();
 
-    //     if (switchLights.isEmpty()) {
-    //         switchLights = equipmentService.getCachedEquipments().stream()
-    //                 .filter(e -> "Light Switch".equals(e.getCategory().getCategoryName()))
-    //                 .toList();
-    //     }
-    //     List<EquipmentState> switchLightStates = equipmentStateService.getCachedEquipmentStates().stream()
-    //             .filter(es -> es.getValue() != null && "light-status".equalsIgnoreCase(es.getValue().getValueName()))
-    //             .toList();
+                this.switchLights = allEquipments.stream()
+                                .filter(e -> "switch".equalsIgnoreCase(e.getCategory().getCategoryName())
+                                                && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
+                                .toList();
 
-    //     List<Value> values = new ArrayList<>();
-    //     if (switchLightStates.isEmpty()) {
-    //         values = valueService.getCachedValues().stream()
-    //                 .filter(e -> "light-status".equalsIgnoreCase(e.getValueName())).toList();
-    //     } else {
-    //         if (values.size() != 0) {
-    //             values.set(0, switchLightStates.get(0).getValue());
-    //         } else {
-    //             values.add(switchLightStates.get(0).getValue());
-    //         }
-    //     }
-    //     if (switchLights.isEmpty()) {
-    //         log.info("No switch lights equipment found to sync.");
-    //         return;
-    //     }
-    //     try {
-    //         tuyaService.getStatusLight(switchLights, switchLightStates, timeStamp, values.get(0));
-    //         log.info("Synced status for switch lights devices. Total: {}", switchLights.size());
-    //     } catch (Exception e) {
-    //         log.error("Failed to sync switch lights equipment: {}", e.getMessage(), e);
-    //     }
-    // }
-
-    private List<Equipment> electricElevators = equipmentService.getCachedEquipments().stream()
-            .filter(e -> "electricElevator".equalsIgnoreCase(e.getCategory().getCategoryName())
-                    && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
-            .toList();
-
-    @Scheduled(fixedRateString = "${tuya.sync.interval.elevator}")
-    public void syncElevatorDevices() {
-        Long timeStamp = System.currentTimeMillis();
-        List<EquipmentState> electricElevatorStates = equipmentStateService.getCachedEquipmentStates().stream()
-                .filter(es -> "electric-current".equalsIgnoreCase(es.getValue().getValueName())
-                        || "active-power".equalsIgnoreCase(es.getValue().getValueName())
-                        || "temperature".equalsIgnoreCase(es.getValue().getValueName())
-                        || "voltage".equalsIgnoreCase(es.getValue().getValueName()))
-                .toList();
-
-        if (electricElevators.isEmpty()) {
-            log.info("No elevator equipment found to sync.");
-            return;
+                this.electricElevators = allEquipments.stream()
+                                .filter(e -> "electricElevator".equalsIgnoreCase(e.getCategory().getCategoryName())
+                                                && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
+                                .toList();
+                this.electricElevatorStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> "electric-current".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "active-power".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "temperature".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "voltage".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "total-energy-consumed"
+                                                                .equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+                this.listElevatorValues = valueService.getCachedValues().stream()
+                                .filter(v -> "electric-current".equalsIgnoreCase(v.getValueName())
+                                                || "active-power".equalsIgnoreCase(v.getValueName())
+                                                || "temperature".equalsIgnoreCase(v.getValueName())
+                                                || "voltage".equalsIgnoreCase(v.getValueName())
+                                                || "total-energy-consumed".equalsIgnoreCase(v.getValueName()))
+                                .toList();
+                this.switchLightStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> es.getValue() != null &&
+                                                "light-status".equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+                this.switchLightValues = valueService.getCachedValues().stream()
+                                .filter(e -> "light-status".equalsIgnoreCase(e.getValueName())).toList();
         }
-        List<Value> values = new ArrayList<>();
-        if (electricElevatorStates.isEmpty()) {
-            values = valueService.getCachedValues();
+
+        @Scheduled(fixedRateString = "${tuya.sync.interval.switchLight}")
+        public void syncSwitchLightDevices() {
+                Long timeStamp = System.currentTimeMillis();
+
+                if (switchLights.isEmpty()) {
+                        switchLights = equipmentService.getCachedEquipments().stream()
+                                        .filter(e -> "Light Switch".equals(e.getCategory().getCategoryName()))
+                                        .toList();
+                }
+
+                if (switchLights.isEmpty()) {
+                        log.info("No switch lights equipment found to sync.");
+                        return;
+                }
+                try {
+                        tuyaService.getStatusLight(switchLights, switchLightStates, timeStamp,
+                                        switchLightValues.get(0));
+                        log.info("Synced status for switch lights devices. Total: {}",
+                                        switchLights.size());
+                } catch (Exception e) {
+                        log.error("Failed to sync switch lights equipment: {}", e.getMessage(), e);
+                }
         }
-        try {
-            tuyaService.getElevatorElectric(electricElevators, electricElevatorStates, timeStamp,values);
-            log.info("Synced properties for elevator devices. Total: {}",
-                    electricElevators.size());
-        } catch (Exception e) {
-            log.error("Failed to sync elevator equipment: {}", e.getMessage(), e);
+
+        @Scheduled(fixedRateString = "${tuya.sync.interval.elevator}")
+        public void syncElevatorDevices() {
+                Long timeStamp = System.currentTimeMillis();
+
+                if (electricElevators.isEmpty()) {
+                        log.info("No elevator equipment found to sync.");
+                        return;
+                }
+                try {
+                        tuyaService.getElevatorElectric(electricElevators, electricElevatorStates, timeStamp,
+                                        listElevatorValues);
+                        log.info("Synced properties for elevator devices. Total: {}",
+                                        electricElevators.size());
+                } catch (Exception e) {
+                        log.error("Failed to sync elevator equipment: {}", e.getMessage(), e);
+                }
         }
-    }
 }

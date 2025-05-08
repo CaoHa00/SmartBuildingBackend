@@ -185,16 +185,18 @@ public class TuyaServiceImplementation implements TuyaService {
 
                 for (JsonNode property : properties) {
                     String code = property.path("code").asText();
-                    double value = property.path("value").asDouble() / 10.0;
+                    double value = property.path("value").asDouble();
+                    
 
-                    if (code.equals("VoltageA") || code.equals("Voltageb") || code.equals("VoltageC")) {
+                    if (code.equals("VoltageA") || code.equals("VoltageB") || code.equals("VoltageC")) {
                         voltageSum += value;
                     }
 
                     if (code.equals("VoltageC")) {
-                        voltageAvg = voltageSum / 3;
+                        voltageAvg = (voltageSum / 3)/10.0;
                         saveOrUpdateState("voltage", voltageAvg, electricElevator, timeStamp, valueMap,
                                 electricElevatorStates, savedEquipmentStates);
+                                continue;
                     }
 
                     Map<String, String> codeToValueKey = Map.of(
@@ -204,7 +206,7 @@ public class TuyaServiceImplementation implements TuyaService {
                             "Temperature", "temperature");
 
                     if (codeToValueKey.containsKey(code)) {
-                        saveOrUpdateState(codeToValueKey.get(code), voltageAvg, electricElevator, timeStamp, valueMap,
+                        saveOrUpdateState(codeToValueKey.get(code), value, electricElevator, timeStamp, valueMap,
                                 electricElevatorStates, savedEquipmentStates);
                     }
                 }
@@ -227,22 +229,31 @@ public class TuyaServiceImplementation implements TuyaService {
             Map<String, Value> valueMap,
             List<EquipmentState> existingStates,
             List<EquipmentState> savedStates) {
-
+        if(valueKey.equals("active-power")||valueKey.equals("electric-current") ){
+            responseValue/=1000;
+        }
+        if(valueKey.equals("total-energy-consumed")){
+            responseValue/=100;
+        }
+        if(valueKey.equals("temperature")){
+            responseValue/=10;
+        }
         Value value = valueMap.get(valueKey);
         if (value == null)
             return;
 
         Map<UUID, EquipmentState> equipmentStateMap = existingStates.stream()
-                .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(value.getValueId()))
+                .filter(es -> es.getValue() != null && es.getValue().getValueId().equals(value.getValueId())) // findByValue
                 .collect(Collectors.toMap(
                         es -> es.getEquipment().getEquipmentId(),
                         Function.identity()));
 
-        EquipmentState equipmentState = equipmentStateMap.get(electricElevator.getEquipmentId());
+        EquipmentState equipmentState = equipmentStateMap.get(electricElevator.getEquipmentId());// findByEquipment
         if (equipmentState == null) {
             equipmentState = new EquipmentState();
             equipmentState.setEquipment(electricElevator);
             equipmentState.setValue(value);
+        }else{
         }
 
         equipmentState.setValueResponse(responseValue);
@@ -406,14 +417,17 @@ public class TuyaServiceImplementation implements TuyaService {
                     equipmentState = new EquipmentState();
                     equipmentState.setEquipment(equipment);
                     equipmentState.setValue(valueInput);
-                }
-                // Always update valueResponse and timestamp
-                if (!equipmentState.getValueResponse().equals(status)) {
                     equipmentState.setValueResponse(status);
+                    equipmentState.setTimeStamp(timeStamp);
+                    savedEquipmentStates.add(equipmentState);
+                }else if (!equipmentState.getValueResponse().equals(status)) { // if #value -> add
+                    equipmentState.setValueResponse(status);
+                    equipmentState.setTimeStamp(timeStamp);
                     savedEquipmentStates.add(equipmentState);
                 }
-                equipmentState.setTimeStamp(timeStamp);
-                // add
+
+           
+               
             }
             equipmentStateService.saveAll(savedEquipmentStates);
         } catch (JsonProcessingException e) {
