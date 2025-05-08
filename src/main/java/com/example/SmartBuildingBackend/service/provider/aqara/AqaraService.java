@@ -4,8 +4,6 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 import java.util.Map;

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.SmartBuildingBackend.dto.equipment.ValueDto;
-import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.mapper.equipment.ValueMapper;
 import com.example.SmartBuildingBackend.repository.equipment.ValueRepository;

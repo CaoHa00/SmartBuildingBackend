@@ -1,14 +1,8 @@
 package com.example.SmartBuildingBackend.controller.space;
 
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
-import com.example.SmartBuildingBackend.dto.equipment.EquipmentStateDto;
 import com.example.SmartBuildingBackend.dto.space.SpaceDto;
 import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
-import com.example.SmartBuildingBackend.entity.equipment.LogValue;
-import com.example.SmartBuildingBackend.mapper.equipment.EquipmentMapper;
-import com.example.SmartBuildingBackend.mapper.equipment.EquipmentStateMapper;
-import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
-import com.example.SmartBuildingBackend.service.equipment.LogValueService;
 import com.example.SmartBuildingBackend.service.provider.tuya.TuyaService;
 import com.example.SmartBuildingBackend.service.space.*;
 
@@ -32,7 +26,6 @@ public class SpaceController {
 
     private final SpaceService spaceService;
     private final TuyaService tuyaService;
-    private final LogValueService logValueService;
 
     @PostMapping
     public ResponseEntity<?> createSpace(@RequestBody SpaceDto dto) {

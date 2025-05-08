@@ -1,11 +1,6 @@
 package com.example.SmartBuildingBackend.Scheduler;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,8 +8,6 @@ import org.springframework.stereotype.Component;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
 import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
 import com.example.SmartBuildingBackend.entity.equipment.Value;
-import com.example.SmartBuildingBackend.mapper.equipment.EquipmentMapper;
-import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentStateService;
 import com.example.SmartBuildingBackend.service.equipment.ValueService;
@@ -43,10 +36,13 @@ public class TuyaScheduler {
 
         private List<Equipment> switchLights;
         private List<Equipment> electricElevators;
+        private List<Equipment> electrics;
         private List<EquipmentState> electricElevatorStates;
         private List<EquipmentState> switchLightStates;
+        private List<EquipmentState> electricStates;
         private List<Value> listElevatorValues;
         private List<Value> switchLightValues;
+        private List<Value> electricValues;
 
         @PostConstruct
         public void init() {
@@ -61,6 +57,11 @@ public class TuyaScheduler {
                                 .filter(e -> "electricElevator".equalsIgnoreCase(e.getCategory().getCategoryName())
                                                 && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
                                 .toList();
+                this.electrics = allEquipments.stream()
+                                .filter(e -> "electric".equalsIgnoreCase(e.getCategory().getCategoryName())
+                                                && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
+                                .toList();
+
                 this.electricElevatorStates = equipmentStateService.getCachedEquipmentStates().stream()
                                 .filter(es -> "electric-current".equalsIgnoreCase(es.getValue().getValueName())
                                                 || "active-power".equalsIgnoreCase(es.getValue().getValueName())
@@ -82,6 +83,19 @@ public class TuyaScheduler {
                                 .toList();
                 this.switchLightValues = valueService.getCachedValues().stream()
                                 .filter(e -> "light-status".equalsIgnoreCase(e.getValueName())).toList();
+
+                this.electricStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> "total-energy-consumed".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "voltage".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "electric-current".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "active-power".equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+                this.electricValues = valueService.getCachedValues().stream()
+                                .filter(v -> "total-energy-consumed".equalsIgnoreCase(v.getValueName())
+                                                ||  "voltage".equalsIgnoreCase(v.getValueName())
+                                                || "electric-current".equalsIgnoreCase(v.getValueName())
+                                                || "active-power".equalsIgnoreCase(v.getValueName()))
+                                .toList();
         }
 
         @Scheduled(fixedRateString = "${tuya.sync.interval.switchLight}")
@@ -119,6 +133,23 @@ public class TuyaScheduler {
                 try {
                         tuyaService.getElevatorElectric(electricElevators, electricElevatorStates, timeStamp,
                                         listElevatorValues);
+                        log.info("Synced properties for elevator devices. Total: {}",
+                                        electricElevators.size());
+                } catch (Exception e) {
+                        log.error("Failed to sync elevator equipment: {}", e.getMessage(), e);
+                }
+        }
+        @Scheduled(fixedRateString = "${tuya.sync.interval.electric}")
+        public void syncElectricDevices() {
+                Long timeStamp = System.currentTimeMillis();
+
+                if (electricElevators.isEmpty()) {
+                        log.info("No elevator equipment found to sync.");
+                        return;
+                }
+                try {
+                        tuyaService.getStatusElectric(electrics, electricStates,timeStamp,
+                        electricValues);
                         log.info("Synced properties for elevator devices. Total: {}",
                                         electricElevators.size());
                 } catch (Exception e) {

@@ -19,18 +19,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.SmartBuildingBackend.entity.AqaraConfig;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
-import com.example.SmartBuildingBackend.entity.equipment.Value;
 import com.example.SmartBuildingBackend.repository.AqaraConfigRepository;
-import com.example.SmartBuildingBackend.repository.equipment.ValueRepository;
 import com.example.SmartBuildingBackend.dto.equipment.EquipmentDto;
-import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.service.equipment.EquipmentService;
-import com.example.SmartBuildingBackend.service.equipment.LogValueService;
-import com.example.SmartBuildingBackend.service.equipment.ValueService;
+
 import com.example.SmartBuildingBackend.service.weather.WeatherService;
 import com.example.SmartBuildingBackend.utils.CreateSign;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.google.api.services.gmail.Gmail;
@@ -38,13 +32,9 @@ import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.MessagePart;
 
-import jakarta.websocket.OnError;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import lombok.AllArgsConstructor;
 
@@ -59,14 +49,9 @@ public class AqaraServiceImplementation implements AqaraService {
 
     private final AqaraConfigRepository aqaraConfigRepository;
     private final Gmail gmailService;
-
-    private LogValueService logValueService;
-    private final ValueService valueService;
     private static int DEFAULT_TEMPERATURE = 0;
     private final WeatherService weatherService;
     private EquipmentService equipmentService;
-    private final ValueRepository valueRepository;
-
     @Override
     public String sendRequestToAqara(Map<String, Object> requestBody) throws Exception {
         return sendAqaraRequest(requestBody);

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.SmartBuildingBackend.dto.equipment.LogValueDto;
 import com.example.SmartBuildingBackend.entity.equipment.Equipment;
-import com.example.SmartBuildingBackend.entity.equipment.EquipmentState;
 import com.example.SmartBuildingBackend.entity.equipment.LogValue;
 import com.example.SmartBuildingBackend.mapper.equipment.LogValueMapper;
 import com.example.SmartBuildingBackend.repository.equipment.EquipmentRepository;
