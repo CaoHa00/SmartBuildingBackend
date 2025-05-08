@@ -1,10 +1,19 @@
 package com.example.SmartBuildingBackend.service.provider.QEnergy;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.SmartBuildingBackend.dto.provider.QEnergyDto;
+import com.example.SmartBuildingBackend.entity.provider.QEnergy;
+import com.example.SmartBuildingBackend.mapper.provider.QEnergyMapper;
+import com.example.SmartBuildingBackend.repository.provider.QEnergyRepository;
 
 @Service
 public class QEnergyServiceImplementaion implements QEnergyService{
@@ -15,8 +24,11 @@ public class QEnergyServiceImplementaion implements QEnergyService{
 
     private final WebClient webClient;
     private String accessToken;
-
-    public QEnergyServiceImplementaion(WebClient.Builder webClientBuilder) {
+    private final List<Double> cumulativeConsumptionList = new CopyOnWriteArrayList<>();
+    private double totalConsumptionAccumulated = 0.0;
+    private final QEnergyRepository qengeryRepository;
+    public QEnergyServiceImplementaion(WebClient.Builder webClientBuilder, QEnergyRepository qengeryRepository) {
+        this.qengeryRepository = qengeryRepository;
         this.webClient = webClientBuilder.baseUrl(HOST).build();
     }
     @Override
@@ -57,34 +69,64 @@ public class QEnergyServiceImplementaion implements QEnergyService{
         .retrieve()
         .bodyToMono(Map.class)
         .block(); 
-
-        if (siteData != null) {
-            System.out.println(siteData);
-            System.out.println("Live Power: " + siteData.get("live_power"));
+        // System.out.println("Site data fetched: " + siteData);
         return siteData;
-        } else {
-        throw new Exception("Failed to retrieve site data.");
-        }
     }
+    public Double calculateCumulativeEnergy(Double powerReadings) {
+        double total = 0;
+        double intervalHours = 0.5;
+        double power = powerReadings; 
+        total += power * intervalHours;
+        return total;
+    }
+
     @Override
     public Map<String,Object> fetchCostConsumptionSummary() throws Exception {
         if( accessToken == null ) {
+            System.out.println("Fetching new access token...");
             getAccessToken();
-           }
-           
-           Map<String, Object> siteData = webClient.get()
-            .uri(SITE_ENDPOINT_CONSUMPTION)
-            .header("Authorization", "Bearer " + accessToken)
-            .retrieve()
-            .bodyToMono(Map.class)
-            .block(); 
-    
-            if (siteData != null) {
-            System.out.println("Total Cost " +siteData.get("total_cost") );
-            System.out.println("Total consumption " +siteData.get("total_consumption") );
-            return siteData;
-            } else {
-            throw new Exception("Failed to retrieve site data.");
-            }
+       }
+       
+       Map<String, Object> siteData = webClient.get()
+        .uri(SITE_ENDPOINT)
+        .header("Authorization", "Bearer " + accessToken)
+        .retrieve()
+        .bodyToMono(Map.class)
+        .block(); 
+
+        Double livePower = (Double) siteData.get("live_power");
+        Double total = calculateCumulativeEnergy(livePower);
+        totalConsumptionAccumulated += Math.round(total * 100.0) / 100.0; 
+        
+        cumulativeConsumptionList.add(totalConsumptionAccumulated);
+        for (Double consumption : cumulativeConsumptionList) {
+            System.out.println("Cumulative Consumption: " + consumption);
+        }
+        QEnergy qEnegery = new QEnergy(LocalDateTime.now(), totalConsumptionAccumulated);
+        qengeryRepository.save(qEnegery);
+        Map<String, Object> result = Map.of(
+            "totalEnergy", totalConsumptionAccumulated
+        );
+        return result;
+    }
+    @Scheduled(cron = "0 0/30 * * * ?")
+    public void scheduleUpdateEnegery() {
+        try {
+            fetchCostConsumptionSummary();
+        } catch (Exception e) {
+            System.err.println("Scheduled fetch failed: " + e.getMessage());
+        }
+    }
+    @Scheduled(cron = "0 0 0 * * ?") 
+    public void resetDailyEnergy() {
+        totalConsumptionAccumulated = 0.0;
+        cumulativeConsumptionList.clear();
+        System.out.println(" Energy data reset for new day"); 
+    }
+   
+    @Override
+    public List<QEnergyDto> getAllQenergy() throws Exception {
+       List<QEnergy> qEnegeryList = qengeryRepository.findAll();
+       return qEnegeryList.stream().map(QEnergyMapper::mapToQEnegyDto).toList();
     }
 }
