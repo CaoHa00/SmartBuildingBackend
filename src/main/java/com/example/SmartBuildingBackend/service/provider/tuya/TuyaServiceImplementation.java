@@ -331,7 +331,7 @@ public class TuyaServiceImplementation implements TuyaService {
     }
 
     @Override
-    public String getStatusElectric(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
+    public String getResponseV01(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp,
             List<Value> values) {
         ResponseEntity<String> response = sendResponseV01(equipments);
 
@@ -367,7 +367,31 @@ public class TuyaServiceImplementation implements TuyaService {
                 for (JsonNode property : properties) {
                     String code = property.path("code").asText();
                     double valueCheck = property.path("value").asDouble();
-
+                    if(code.equals("va_temperature")){
+                        Value valueInput = valueMap.get("temperature");
+                        double temperature = valueCheck/10.0;
+                        EquipmentState equipmentStateToSave = updateOrCreateStates(equipment, valueInput, temperature,
+                                timeStamp, equipmentStates);
+                        savedEquipmentStates.add(equipmentStateToSave);
+                        continue;
+                    }
+                    if(code.equals("va_humidity")){
+                        Value valueInput = valueMap.get("humidity");
+                        double humidity = valueCheck;
+                        EquipmentState equipmentStateToSave = updateOrCreateStates(equipment, valueInput, humidity,
+                                timeStamp, equipmentStates);
+                        savedEquipmentStates.add(equipmentStateToSave);
+                        equipmentStateService.saveAll(savedEquipmentStates);
+                        continue;
+                    }
+                    if(code.equals("battery_percentage")){
+                        Value valueInput = valueMap.get("battery-percentage");
+                        double batteryPercentage = valueCheck;
+                        EquipmentState equipmentStateToSave = updateOrCreateStates(equipment, valueInput, batteryPercentage,
+                                timeStamp, equipmentStates);
+                        savedEquipmentStates.add(equipmentStateToSave);
+                        continue;
+                    }
                     if ("forward_energy_total".equals(code)) {
                         Value valueInput = valueMap.get("total-energy-consumed");
                         energyTotal = valueCheck / 100.0;

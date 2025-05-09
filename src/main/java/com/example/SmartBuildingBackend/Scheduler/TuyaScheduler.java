@@ -37,12 +37,15 @@ public class TuyaScheduler {
         private List<Equipment> switchLights;
         private List<Equipment> electricElevators;
         private List<Equipment> electrics;
+        private List<Equipment> sensors;
         private List<EquipmentState> electricElevatorStates;
         private List<EquipmentState> switchLightStates;
         private List<EquipmentState> electricStates;
+        private List<EquipmentState> sensorStates;
         private List<Value> listElevatorValues;
         private List<Value> switchLightValues;
         private List<Value> electricValues;
+        private List<Value> sensorValues;
 
         @PostConstruct
         public void init() {
@@ -61,6 +64,10 @@ public class TuyaScheduler {
                                 .filter(e -> "electric".equalsIgnoreCase(e.getCategory().getCategoryName())
                                                 && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
                                 .toList();
+                this.sensors = allEquipments.stream()
+                                .filter(e -> "sensor".equalsIgnoreCase(e.getCategory().getCategoryName())
+                                                && "Tuya".equalsIgnoreCase(e.getEquipmentType().getEquipmentTypeName()))
+                                .toList();
 
                 this.electricElevatorStates = equipmentStateService.getCachedEquipmentStates().stream()
                                 .filter(es -> "electric-current".equalsIgnoreCase(es.getValue().getValueName())
@@ -70,6 +77,25 @@ public class TuyaScheduler {
                                                 || "total-energy-consumed"
                                                                 .equalsIgnoreCase(es.getValue().getValueName()))
                                 .toList();
+                this.switchLightStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> es.getValue() != null &&
+                                                "light-status".equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+                this.electricStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> "total-energy-consumed".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "voltage".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "electric-current".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "active-power".equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+                this.sensorStates = equipmentStateService.getCachedEquipmentStates().stream()
+                                .filter(es -> "temperature".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "humidity".equalsIgnoreCase(es.getValue().getValueName())
+                                                || "battery-percentage".equalsIgnoreCase(es.getValue().getValueName()))
+                                .toList();
+
+                this.switchLightValues = valueService.getCachedValues().stream()
+                                .filter(e -> "light-status".equalsIgnoreCase(e.getValueName())).toList();
+
                 this.listElevatorValues = valueService.getCachedValues().stream()
                                 .filter(v -> "electric-current".equalsIgnoreCase(v.getValueName())
                                                 || "active-power".equalsIgnoreCase(v.getValueName())
@@ -77,31 +103,22 @@ public class TuyaScheduler {
                                                 || "voltage".equalsIgnoreCase(v.getValueName())
                                                 || "total-energy-consumed".equalsIgnoreCase(v.getValueName()))
                                 .toList();
-                this.switchLightStates = equipmentStateService.getCachedEquipmentStates().stream()
-                                .filter(es -> es.getValue() != null &&
-                                                "light-status".equalsIgnoreCase(es.getValue().getValueName()))
-                                .toList();
-                this.switchLightValues = valueService.getCachedValues().stream()
-                                .filter(e -> "light-status".equalsIgnoreCase(e.getValueName())).toList();
-
-                this.electricStates = equipmentStateService.getCachedEquipmentStates().stream()
-                                .filter(es -> "total-energy-consumed".equalsIgnoreCase(es.getValue().getValueName())
-                                                || "voltage".equalsIgnoreCase(es.getValue().getValueName())
-                                                || "electric-current".equalsIgnoreCase(es.getValue().getValueName())
-                                                || "active-power".equalsIgnoreCase(es.getValue().getValueName()))
-                                .toList();
                 this.electricValues = valueService.getCachedValues().stream()
                                 .filter(v -> "total-energy-consumed".equalsIgnoreCase(v.getValueName())
-                                                ||  "voltage".equalsIgnoreCase(v.getValueName())
+                                                || "voltage".equalsIgnoreCase(v.getValueName())
                                                 || "electric-current".equalsIgnoreCase(v.getValueName())
                                                 || "active-power".equalsIgnoreCase(v.getValueName()))
+                                .toList();
+                this.sensorValues = valueService.getCachedValues().stream()
+                                .filter(v -> "temperature".equalsIgnoreCase(v.getValueName())
+                                                || "humidity".equalsIgnoreCase(v.getValueName())
+                                                || "battery-percentage".equalsIgnoreCase(v.getValueName()))
                                 .toList();
         }
 
         @Scheduled(fixedRateString = "${tuya.sync.interval.switchLight}")
         public void syncSwitchLightDevices() {
                 Long timeStamp = System.currentTimeMillis();
-
                 if (switchLights.isEmpty()) {
                         switchLights = equipmentService.getCachedEquipments().stream()
                                         .filter(e -> "Light Switch".equals(e.getCategory().getCategoryName()))
@@ -139,21 +156,39 @@ public class TuyaScheduler {
                         log.error("Failed to sync elevator equipment: {}", e.getMessage(), e);
                 }
         }
+
         @Scheduled(fixedRateString = "${tuya.sync.interval.electric}")
         public void syncElectricDevices() {
                 Long timeStamp = System.currentTimeMillis();
 
-                if (electricElevators.isEmpty()) {
-                        log.info("No elevator equipment found to sync.");
+                if (electrics.isEmpty()) {
+                        log.info("No electric equipment found to sync.");
                         return;
                 }
                 try {
-                        tuyaService.getStatusElectric(electrics, electricStates,timeStamp,
-                        electricValues);
-                        log.info("Synced properties for elevator devices. Total: {}",
-                                        electricElevators.size());
+                        tuyaService.getResponseV01(electrics, electricStates, timeStamp, 
+                                        electricValues);
+                        log.info("Synced properties for electric devices. Total: {}",
+                        electrics.size());
                 } catch (Exception e) {
-                        log.error("Failed to sync elevator equipment: {}", e.getMessage(), e);
+                        log.error("Failed to sync electric equipment: {}", e.getMessage(), e);
+                }
+        }
+        @Scheduled(fixedRateString = "${tuya.sync.interval.sensor}")
+        public void syncsensorDevices() {
+                Long timeStamp = System.currentTimeMillis();
+
+                if (sensors.isEmpty()) {
+                        log.info("No sensor equipment found to sync.");
+                        return;
+                }
+                try {
+                        tuyaService.getResponseV01(sensors, sensorStates, timeStamp,
+                                        sensorValues);
+                        log.info("Synced properties for sensor devices. Total: {}",
+                        sensors.size());
+                } catch (Exception e) {
+                        log.error("Failed to sync sensor equipment: {}", e.getMessage(), e);
                 }
         }
 }
