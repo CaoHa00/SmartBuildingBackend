@@ -31,7 +31,7 @@ public interface TuyaService {
 
   String getStatusLight(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp, Value value);
 
-  String getStatusElectric(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp, List<Value> values);
+  String getResponseV01(List<Equipment> equipments, List<EquipmentState> equipmentStates, Long timeStamp, List<Value> values);
 
   String controlLight(UUID spaceId, int valueLight);
 
